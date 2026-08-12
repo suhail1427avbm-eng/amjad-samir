@@ -250,6 +250,21 @@ textarea.note:focus,input.in:focus{outline:none;border-color:var(--accent)}
 .swap{display:flex;gap:5px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:4px}
 .swap button{flex:1;padding:8px;border-radius:9px;font-size:13px;font-weight:700;color:var(--ink2)}
 .swap button.on{background:var(--accent);color:#fff}
+
+/* ---------- الدخول والحساب ---------- */
+.authwrap{min-height:88vh;display:flex;align-items:center;justify-content:center;padding:14px 0}
+.authcard{width:100%;max-width:360px;padding:24px 22px}
+.authcard .mark{margin:0 auto 14px}
+.authcard h2{font-family:'Reem Kufi',serif;font-size:21px;text-align:center;margin:0 0 3px;font-weight:500}
+.authcard p.sub{text-align:center;font-size:11.5px;color:var(--ink2);margin:0 0 16px;font-weight:600}
+.authcard .in{margin-bottom:9px}
+.aerr{background:color-mix(in srgb, var(--s0) 12%, transparent);color:var(--s0);border-radius:11px;padding:9px 11px;font-size:12px;font-weight:700;margin-bottom:10px;line-height:1.7}
+.ainfo{background:color-mix(in srgb, var(--s4) 12%, transparent);color:var(--s4);border-radius:11px;padding:9px 11px;font-size:12px;font-weight:700;margin-bottom:10px;line-height:1.7}
+.aforgot{display:block;width:100%;text-align:center;margin-top:9px;font-size:11.5px;font-weight:700;color:var(--ink2);text-decoration:underline}
+.aswitch{text-align:center;margin-top:15px;font-size:12.5px;font-weight:700;color:var(--ink2)}
+.aswitch button{color:var(--accent);font-weight:700;text-decoration:underline}
+.load{animation:pulse 1.3s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.45}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -257,8 +272,38 @@ textarea.note:focus,input.in:focus{outline:none;border-color:var(--accent)}
 <div id="app"></div>
 <input type="file" id="pick" accept="application/json" style="display:none">
 
-<script>
+<script type="module">
 "use strict";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {
+  getAuth, setPersistence, browserLocalPersistence, onAuthStateChanged,
+  createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  sendPasswordResetEmail, signOut
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {
+  initializeFirestore, doc, getDoc, setDoc,
+  persistentLocalCache, persistentSingleTabManager
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+/* ============================================================
+   ربط مِرقاة بحساب المستخدم على Firebase — كل جهاز يدخل بنفس
+   البريد وكلمة المرور يرى نفس السجل.
+   ============================================================ */
+var firebaseConfig = {
+  apiKey: "AIzaSyBjkvARmuOcz3REUaUvNJ9YwtaU5-Wi1qU",
+  authDomain: "amjad-samir.firebaseapp.com",
+  projectId: "amjad-samir",
+  storageBucket: "amjad-samir.firebasestorage.app",
+  messagingSenderId: "867423470067",
+  appId: "1:867423470067:web:e0cd7b356b1bcc811e5286"
+};
+var fbApp = initializeApp(firebaseConfig);
+var auth = getAuth(fbApp);
+setPersistence(auth, browserLocalPersistence).catch(function(e){ console.error(e); });
+var dbFs = initializeFirestore(fbApp, {
+  localCache: persistentLocalCache({ tabManager: persistentSingleTabManager() })
+});
+
 /* ============================================================
    [١] النظام والثوابت
    ------------------------------------------------------------
@@ -396,30 +441,104 @@ var S = {
 var UI = {
   tab:"today", cursor:today(), athar:0, sheet:null,
   metric:"total", range:30, mode:"day", month:today().slice(0,7),
-  confirm:null, msg:"", form:{ name:"", type:"check", target:1, points:2, unit:"" }
+  confirm:null, msg:"", form:{ name:"", type:"check", target:1, points:2, unit:"" },
+  auth:{ mode:"login", email:"", password:"", password2:"", busy:false, err:"", info:"" }
 };
 
-function load(){
-  try{
-    var raw = localStorage.getItem(KEY);
-    if(raw){
-      var d = JSON.parse(raw);
-      if(d && d.cfg) S.cfg = Object.assign({}, S.cfg, d.cfg);
+/* حالة الدخول: loading (جاري التحقق) | signedout (شاشة الدخول) | signedin (التطبيق) */
+var AUTH_STATE = "loading";
+var CLOUD_UID = null;
+var CLOUD_EMAIL = "";
+
+function defaultCfg(){
+  return { start: weekStart(today()), theme:"light", quran:{target:5,unit:"صفحة"}, habits:DEFAULT_HABITS.slice() };
+}
+
+async function bootCloudData(){
+  var ref = doc(dbFs, "users", CLOUD_UID);
+  var snap = await getDoc(ref);
+  if(snap.exists()){
+    var data = snap.data() || {};
+    S.cfg = Object.assign(defaultCfg(), data.cfg || {});
+    if(!Array.isArray(S.cfg.habits)) S.cfg.habits = DEFAULT_HABITS.slice();
+    if(!S.cfg.quran) S.cfg.quran = {target:5,unit:"صفحة"};
+    S.days = data.days || {};
+  }else{
+    /* أول دخول: لو فيه سجل قديم محفوظ محلياً على هذا الجهاز (نسخة ما قبل السحابة) نرفعه تلقائياً */
+    var legacy = null;
+    try{ var raw = localStorage.getItem(KEY); if(raw) legacy = JSON.parse(raw); }catch(e){}
+    if(legacy && legacy.days && Object.keys(legacy.days).length){
+      S.cfg = Object.assign(defaultCfg(), legacy.cfg || {});
       if(!Array.isArray(S.cfg.habits)) S.cfg.habits = DEFAULT_HABITS.slice();
-      if(!S.cfg.quran) S.cfg.quran = {target:5,unit:"صفحة"};
-      if(d && d.days) S.days = d.days;
+      S.days = legacy.days;
+    }else{
+      S.cfg = defaultCfg();
+      S.days = {};
     }
-  }catch(e){ console.error(e); }
+    await setDoc(ref, { cfg:S.cfg, days:S.days, updatedAt:Date.now() });
+  }
   if(!S.cfg.start) S.cfg.start = weekStart(today());
   document.documentElement.setAttribute("data-theme", S.cfg.theme==="dark" ? "dark" : "light");
 }
+
 var saveT = null, saveOk = true;
 function save(){
   clearTimeout(saveT);
   saveT = setTimeout(function(){
-    try{ localStorage.setItem(KEY, JSON.stringify(S)); saveOk = true; }
-    catch(e){ console.error(e); saveOk = false; }
-  }, 250);
+    if(!CLOUD_UID) return;
+    var ref = doc(dbFs, "users", CLOUD_UID);
+    setDoc(ref, { cfg:S.cfg, days:S.days, updatedAt:Date.now() })
+      .then(function(){ if(!saveOk){ saveOk = true; render(); } })
+      .catch(function(e){ console.error(e); saveOk = false; render(); });
+  }, 350);
+}
+
+function authErrMsg(e){
+  var map = {
+    "auth/invalid-email":"البريد الإلكتروني غير صحيح.",
+    "auth/missing-password":"أدخل كلمة المرور.",
+    "auth/user-not-found":"لا يوجد حساب بهذا البريد — جرّب «أنشئ واحدًا».",
+    "auth/wrong-password":"كلمة المرور غير صحيحة.",
+    "auth/invalid-credential":"البريد أو كلمة المرور غير صحيحة.",
+    "auth/email-already-in-use":"هذا البريد مسجّل من قبل — جرّب «سجّل الدخول».",
+    "auth/weak-password":"كلمة المرور قصيرة، اختر ٦ أحرف فأكثر.",
+    "auth/too-many-requests":"محاولات كثيرة متتالية، انتظر قليلاً وحاول مجدداً.",
+    "auth/network-request-failed":"تحقق من اتصالك بالإنترنت."
+  };
+  return map[(e && e.code) || ""] || "حدث خطأ غير متوقع، حاول مرة أخرى.";
+}
+
+async function handleAuthSubmit(){
+  var a = UI.auth;
+  var email = (a.email||"").trim(), pass = a.password||"";
+  a.err = ""; a.info = "";
+  if(!email || !pass){ a.err = "أدخل البريد وكلمة المرور."; render(); return; }
+  if(a.mode==="signup"){
+    if(pass !== (a.password2||"")){ a.err = "كلمتا المرور غير متطابقتين."; render(); return; }
+    if(pass.length < 6){ a.err = "كلمة المرور يجب أن تكون ٦ أحرف على الأقل."; render(); return; }
+  }
+  a.busy = true; render();
+  try{
+    if(a.mode==="signup") await createUserWithEmailAndPassword(auth, email, pass);
+    else await signInWithEmailAndPassword(auth, email, pass);
+    /* onAuthStateChanged سيكمل تحميل البيانات ورسم الشاشة */
+  }catch(e){
+    a.busy = false; a.err = authErrMsg(e); render();
+  }
+}
+async function handleForgotPassword(){
+  var a = UI.auth;
+  var email = (a.email||"").trim();
+  a.err = ""; a.info = "";
+  if(!email){ a.err = "اكتب بريدك أولاً في الحقل أعلاه."; render(); return; }
+  a.busy = true; render();
+  try{
+    await sendPasswordResetEmail(auth, email);
+    a.busy = false; a.info = "أُرسل رابط إعادة تعيين كلمة المرور إلى بريدك.";
+  }catch(e){
+    a.busy = false; a.err = authErrMsg(e);
+  }
+  render();
 }
 function blankDay(){ return { p:{}, w:{q:null,sb:0,ms:0}, h:{}, note:"" }; }
 function getDay(ds){ return S.days[ds] || null; }
@@ -703,7 +822,7 @@ function viewToday(){
   /* المحاسبة */
   h += '<div class="sect"><h2>محاسبة اليوم</h2><em>ماذا تُصلح غداً؟</em></div>';
   h += '<textarea class="note" rows="3" data-inp="note" placeholder="ما الذي أضعف صلاتك اليوم؟ وما الذي تعزم عليه غداً؟">'+esc(d&&d.note?d.note:"")+'</textarea>';
-  h += '<div class="foot">يُحفظ كل شيء تلقائياً على هذا الجهاز.</div>';
+  h += '<div class="foot">يُحفظ كل شيء تلقائياً في حسابك.</div>';
   h += '</div>';
   return h;
 }
@@ -951,6 +1070,12 @@ function viewSettings(){
 
   var h = '<div class="screen">';
 
+  h += '<div class="sect"><h2>الحساب</h2></div>'
+     + '<div class="card box">'
+     +   '<div class="hint">مسجّل الدخول بـ: <b style="color:var(--accent);font-family:\'Reem Kufi\',serif;font-weight:500">'+esc(CLOUD_EMAIL)+'</b></div>'
+     +   '<button class="btn dg sm" data-a="signout">تسجيل الخروج</button>'
+     + '</div>';
+
   h += '<div class="sect"><h2>المظهر</h2></div>'
      + '<div class="swap">'
      +   '<button class="'+(S.cfg.theme!=="dark"?"on":"")+'" data-a="theme" data-v="light">فاتح</button>'
@@ -1020,11 +1145,11 @@ function viewSettings(){
      +   '<button class="btn dg sm" data-a="reset">'+(UI.confirm==="reset"?"تأكيد المسح":"مسح الكل")+'</button>'
      + '</div>'
      + (UI.msg ? '<div class="hint" style="color:var(--accent)">'+esc(UI.msg)+'</div>' : "")
-     + '<div class="hint">التخزين: محلي على هذا الجهاز · '+(saveOk?"يعمل":"فيه خلل")+' · '+ar(recorded)+' يوم مسجّل.</div>'
+     + '<div class="hint">التخزين: سحابي (Firebase) · '+(saveOk?"يعمل":"فيه خلل — تحقق من الإنترنت")+' · '+ar(recorded)+' يوم مسجّل.</div>'
      + '<div class="hint">الاستيراد يستبدل كل ما هو موجود — صدّر نسخة أولاً.</div>'
      + '</div>';
 
-  h += '<div class="foot">مِرقاة — ملف واحد، بلا حساب ولا إنترنت.</div></div>';
+  h += '<div class="foot">مِرقاة — سجلّك محفوظ في حسابك، يصلك من أي جهاز.</div></div>';
   return h;
 }
 function rl(a,b){ return '<div class="rline"><span>'+a+'</span><b>'+b+'</b></div>'; }
@@ -1032,14 +1157,17 @@ function rl(a,b){ return '<div class="rline"><span>'+a+'</span><b>'+b+'</b></div
 /* ============================================================
    [١٠] الهيكل والرسم
    ============================================================ */
+function markSVG(){
+  return '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round">'
+    +     '<path d="M12 3v18"/><path d="M4 8h16"/><path d="M4 8l-2.5 5a3.2 3.2 0 0 0 5 0Z"/><path d="M20 8l2.5 5a3.2 3.2 0 0 1-5 0Z"/><path d="M8.5 21h7"/>'
+    + '</svg>';
+}
 function viewTop(){
   var ws = weekStart(today()), wTotal = 0;
   for(var i=0;i<7;i++) wTotal += dayScore(getDay(shift(ws,i)));
   return '<div class="top">'
     + '<div class="brand">'
-    +   '<div class="mark"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round">'
-    +     '<path d="M12 3v18"/><path d="M4 8h16"/><path d="M4 8l-2.5 5a3.2 3.2 0 0 0 5 0Z"/><path d="M20 8l2.5 5a3.2 3.2 0 0 1-5 0Z"/><path d="M8.5 21h7"/>'
-    +   '</svg></div>'
+    +   '<div class="mark">'+markSVG()+'</div>'
     +   '<div><h1>مِرقاة</h1><p>محاسبة النفس اليومية</p></div>'
     + '</div>'
     + '<div class="wk'+(wTotal>BASE_WEEK?" full":"")+'"><b>'+ar(wTotal)+'</b><span>من '+ar(BASE_WEEK)+' هذا الأسبوع</span></div>'
@@ -1049,15 +1177,41 @@ function viewTabs(){
   function b(id,label){ return '<button class="'+(UI.tab===id?"on":"")+'" data-a="tab" data-v="'+id+'">'+label+'</button>'; }
   return '<div class="tabs">'+b("today","اليوم")+b("hist","السجل")+b("set","الضبط")+'</div>';
 }
+function viewLoading(){
+  return '<div class="authwrap"><div style="text-align:center">'
+    + '<div class="mark load" style="width:52px;height:52px;margin:0 auto 14px">'+markSVG()+'</div>'
+    + '<div class="hint">جاري تحميل حسابك…</div>'
+    + '</div></div>';
+}
+function viewAuth(){
+  var a = UI.auth, isSignup = a.mode==="signup";
+  var h = '<div class="authwrap"><div class="card authcard">';
+  h += '<div class="mark" style="width:52px;height:52px">'+markSVG()+'</div>';
+  h += '<h2>'+(isSignup?"إنشاء حساب في مِرقاة":"الدخول إلى مِرقاة")+'</h2>';
+  h += '<p class="sub">'+(isSignup?"سجلّك يُحفظ ويصلك من أي جهاز":"محاسبة النفس اليومية")+'</p>';
+  if(a.err) h += '<div class="aerr">'+esc(a.err)+'</div>';
+  if(a.info) h += '<div class="ainfo">'+esc(a.info)+'</div>';
+  h += '<input class="in" type="email" inputmode="email" autocomplete="email" placeholder="البريد الإلكتروني" value="'+esc(a.email)+'" data-inp="aemail">';
+  h += '<input class="in" type="password" autocomplete="'+(isSignup?"new-password":"current-password")+'" placeholder="كلمة المرور" value="'+esc(a.password)+'" data-inp="apass">';
+  if(isSignup) h += '<input class="in" type="password" autocomplete="new-password" placeholder="تأكيد كلمة المرور" value="'+esc(a.password2)+'" data-inp="apass2">';
+  h += '<button class="btn" style="width:100%;margin-top:5px" data-a="asubmit"'+(a.busy?" disabled":"")+'>'+(a.busy?"جارٍ…":(isSignup?"إنشاء الحساب":"دخول"))+'</button>';
+  if(!isSignup) h += '<button class="aforgot" data-a="aforgot">نسيت كلمة المرور؟</button>';
+  h += '<div class="aswitch">'+(isSignup?"لديك حساب؟ ":"ليس لديك حساب؟ ")+'<button data-a="atoggle">'+(isSignup?"سجّل الدخول":"أنشئ واحدًا")+'</button></div>';
+  h += '</div></div>';
+  return h;
+}
 function render(){
+  var app = document.getElementById("app");
+  if(AUTH_STATE==="loading"){ app.innerHTML = viewLoading(); return; }
+  if(AUTH_STATE==="signedout"){ app.innerHTML = viewAuth(); return; }
   var body = UI.tab==="today" ? viewToday() : UI.tab==="hist" ? viewHistory() : viewSettings();
-  document.getElementById("app").innerHTML = viewTop() + body + viewTabs() + viewSheet();
+  app.innerHTML = viewTop() + body + viewTabs() + viewSheet();
 }
 
 /* ============================================================
    [١١] التفاعل
    ============================================================ */
-document.addEventListener("click", function(ev){
+document.addEventListener("click", async function(ev){
   var el = ev.target.closest("[data-a]");
   if(!el) return;
   var a = el.dataset.a, v = el.dataset.v, i = el.dataset.i;
@@ -1065,6 +1219,11 @@ document.addEventListener("click", function(ev){
   if(a==="close" && el.classList.contains("veil") && ev.target.closest("[data-stop]")) return;
 
   switch(a){
+    case "asubmit": await handleAuthSubmit(); break;
+    case "aforgot": await handleForgotPassword(); break;
+    case "atoggle": UI.auth.mode = UI.auth.mode==="login"?"signup":"login"; UI.auth.err=""; UI.auth.info=""; break;
+    case "signout": try{ await signOut(auth); }catch(e){ console.error(e); } break;
+
     case "tab": UI.tab = v; UI.confirm=null; UI.msg=""; window.scrollTo(0,0); break;
     case "go": UI.cursor = shift(UI.cursor, +v); if(UI.cursor>today()) UI.cursor=today(); break;
     case "today": UI.cursor = today(); break;
@@ -1170,6 +1329,9 @@ document.addEventListener("input", function(ev){
     case "hunit": UI.form.unit = val; break;
     case "qtarget": S.cfg.quran.target = Math.max(1, +val||1); save(); break;
     case "qunit": S.cfg.quran.unit = val; save(); break;
+    case "aemail": UI.auth.email = val; break;
+    case "apass": UI.auth.password = val; break;
+    case "apass2": UI.auth.password2 = val; break;
   }
 });
 document.addEventListener("change", function(ev){
@@ -1181,6 +1343,9 @@ document.addEventListener("change", function(ev){
 });
 document.addEventListener("keydown", function(ev){
   if(ev.key==="Escape" && UI.sheet){ UI.sheet=null; render(); }
+  if(ev.key==="Enter" && AUTH_STATE==="signedout" && ev.target.closest(".authcard")){
+    ev.preventDefault(); handleAuthSubmit();
+  }
 });
 
 /* ============================================================
@@ -1220,12 +1385,38 @@ document.getElementById("pick").addEventListener("change", function(ev){
 });
 
 /* ============================================================
-   [١٣] الإقلاع
+   [١٣] الإقلاع — تسجيل الدخول أولاً، ثم تحميل السجل من السحابة
    ============================================================ */
-load();
 UI.cursor = today();
 UI.month = today().slice(0,7);
-render();
+render(); /* شاشة التحميل */
+
+onAuthStateChanged(auth, function(user){
+  if(user){
+    CLOUD_UID = user.uid;
+    CLOUD_EMAIL = user.email || "";
+    AUTH_STATE = "loading";
+    render();
+    bootCloudData().then(function(){
+      AUTH_STATE = "signedin";
+      UI.cursor = today();
+      UI.month = today().slice(0,7);
+      render();
+    }).catch(function(e){
+      console.error(e);
+      CLOUD_UID = null;
+      AUTH_STATE = "signedout";
+      UI.auth.err = "تعذّر تحميل سجلّك، تحقق من الإنترنت وحاول مجدداً.";
+      render();
+    });
+  }else{
+    CLOUD_UID = null; CLOUD_EMAIL = "";
+    S.cfg = defaultCfg(); S.days = {};
+    UI.auth = { mode:"login", email:"", password:"", password2:"", busy:false, err:"", info:"" };
+    AUTH_STATE = "signedout";
+    render();
+  }
+});
 </script>
 </body>
 </html>
