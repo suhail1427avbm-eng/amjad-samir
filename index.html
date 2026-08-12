@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>مِرقاة — محاسبة النفس</title>
+<title>محاسبة النفس</title>
 <meta name="theme-color" content="#F3EDE1">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="مِرقاة">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400..700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="apple-mobile-web-app-title" content="محاسبة النفس">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-32.png" sizes="32x32">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
 <style>
 /* ============================================================
    مِرقاة — محاسبة النفس اليومية
@@ -17,6 +18,11 @@
    الأسبوع: من السبت إلى الجمعة
    ============================================================ */
 
+@font-face{font-family:'Thmanyah';src:url('fonts/Thmanyah-Light.woff2') format('woff2');font-weight:300;font-style:normal;font-display:swap}
+@font-face{font-family:'Thmanyah';src:url('fonts/Thmanyah-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Thmanyah';src:url('fonts/Thmanyah-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:'Thmanyah';src:url('fonts/Thmanyah-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'Thmanyah';src:url('fonts/Thmanyah-Black.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
 :root{
   --bg:#F3EDE1; --bg2:#E7DDC9; --card:#FFFCF5; --card2:#F7F1E4;
   --line:rgba(42,35,24,.13); --line2:rgba(42,35,24,.07);
@@ -44,13 +50,13 @@ body{
   background-image:radial-gradient(120% 70% at 50% 0%, var(--bg2) 0%, var(--bg) 62%);
   background-attachment:fixed;
   color:var(--ink);
-  font-family:'IBM Plex Sans Arabic',system-ui,-apple-system,sans-serif;
+  font-family:'Thmanyah',system-ui,-apple-system,sans-serif;
   -webkit-tap-highlight-color:transparent;
   min-height:100vh;
 }
 button{font-family:inherit;color:inherit;border:none;background:none;cursor:pointer;padding:0}
 input,textarea,select{font-family:inherit}
-.kufi{font-family:'Reem Kufi',serif}
+.kufi{font-family:'Thmanyah',serif}
 
 #app{max-width:560px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top)) 14px 104px}
 
@@ -59,16 +65,16 @@ input,textarea,select{font-family:inherit}
 .brand{display:flex;align-items:center;gap:9px}
 .mark{width:38px;height:38px;border-radius:12px;background:var(--accent);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);flex:0 0 auto}
 .mark svg{display:block}
-.brand h1{font-family:'Reem Kufi',serif;font-size:25px;margin:0;line-height:1;letter-spacing:.5px}
+.brand h1{font-family:'Thmanyah',serif;font-size:25px;margin:0;line-height:1;letter-spacing:.5px}
 .brand p{margin:3px 0 0;font-size:11px;font-weight:600;color:var(--ink2)}
 .wk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:7px 12px;text-align:center;box-shadow:var(--shadow);min-width:104px}
-.wk b{display:block;font-family:'Reem Kufi',serif;font-size:21px;line-height:1.1;color:var(--accent)}
+.wk b{display:block;font-family:'Thmanyah',serif;font-size:21px;line-height:1.1;color:var(--accent)}
 .wk span{font-size:10px;font-weight:600;color:var(--ink2)}
 .wk.full b{color:var(--s6)}
 
 /* ---------- عناصر عامة ---------- */
 .sect{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:22px 3px 9px}
-.sect h2{font-family:'Reem Kufi',serif;font-size:17px;margin:0;font-weight:500}
+.sect h2{font-family:'Thmanyah',serif;font-size:17px;margin:0;font-weight:500}
 .sect em{font-style:normal;font-size:11px;font-weight:600;color:var(--ink2)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
 .empty{color:var(--ink2);font-size:12.5px;font-weight:600;text-align:center;padding:16px}
@@ -82,7 +88,7 @@ input,textarea,select{font-family:inherit}
 .nav-a{width:38px;height:38px;border-radius:11px;font-size:22px;color:var(--ink2);display:flex;align-items:center;justify-content:center}
 .nav-a:disabled{opacity:.22}
 .dcenter{text-align:center;flex:1;min-width:0}
-.dcenter b{display:block;font-family:'Reem Kufi',serif;font-size:17px;font-weight:500}
+.dcenter b{display:block;font-family:'Thmanyah',serif;font-size:17px;font-weight:500}
 .dcenter i{font-style:normal;font-size:11px;font-weight:600;color:var(--ink2)}
 .dcenter u{display:inline-block;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;margin-top:1px}
 
@@ -97,7 +103,7 @@ input,textarea,select{font-family:inherit}
 .gwrap{position:relative;width:132px;height:78px;flex:0 0 auto}
 .gwrap svg{display:block}
 .gnum{position:absolute;inset:auto 0 0;text-align:center}
-.gnum b{display:block;font-family:'Reem Kufi',serif;font-size:31px;line-height:1}
+.gnum b{display:block;font-family:'Thmanyah',serif;font-size:31px;line-height:1}
 .gnum span{font-size:10.5px;font-weight:700;color:var(--ink2)}
 .gside{flex:1;min-width:0}
 .grow{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:700;color:var(--ink2);margin-bottom:4px}
@@ -109,21 +115,21 @@ input,textarea,select{font-family:inherit}
 .d7.on{box-shadow:0 0 0 2px var(--accent)}
 .d7.has{color:#fff;border-color:transparent}
 .delta{font-size:11px;font-weight:700;margin-top:9px;color:var(--ink2)}
-.delta b{font-family:'Reem Kufi',serif;font-size:13px}
+.delta b{font-family:'Thmanyah',serif;font-size:13px}
 
 /* ---------- الصلوات ---------- */
 .plist{display:flex;flex-direction:column;gap:7px}
 .prow{display:flex;align-items:center;gap:10px;width:100%;text-align:right;padding:11px 13px;background:var(--card);border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow);transition:transform .08s ease}
 .prow:active{transform:scale(.988)}
 .prow.bonus{border-color:color-mix(in srgb, var(--s6) 55%, transparent)}
-.pname{font-family:'Reem Kufi',serif;font-size:17px;flex:0 0 56px;font-weight:500}
+.pname{font-family:'Thmanyah',serif;font-size:17px;flex:0 0 56px;font-weight:500}
 .pdots{display:flex;gap:5px;flex:1}
 .dot{width:25px;height:25px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
 .dot.off{background:transparent;border:1px dashed var(--line);color:var(--ink3)}
-.dot.plus{width:auto;padding:0 7px;background:var(--s6);font-family:'Reem Kufi',serif}
-.pscore{font-family:'Reem Kufi',serif;font-size:19px;min-width:52px;text-align:left}
-.pscore i{font-style:normal;font-size:10.5px;font-family:'IBM Plex Sans Arabic';font-weight:600;color:var(--ink3);margin-right:2px}
-.pscore .add{font-family:'IBM Plex Sans Arabic';font-size:12px;font-weight:700;color:var(--accent)}
+.dot.plus{width:auto;padding:0 7px;background:var(--s6);font-family:'Thmanyah',serif}
+.pscore{font-family:'Thmanyah',serif;font-size:19px;min-width:52px;text-align:left}
+.pscore i{font-style:normal;font-size:10.5px;font-family:'Thmanyah';font-weight:600;color:var(--ink3);margin-right:2px}
+.pscore .add{font-family:'Thmanyah';font-size:12px;font-weight:700;color:var(--accent)}
 
 /* ---------- الأوراد والعادات ---------- */
 .wird{padding:12px;display:flex;flex-direction:column;gap:9px}
@@ -145,8 +151,8 @@ input,textarea,select{font-family:inherit}
 .chk.on{background:var(--s4);border-color:var(--s4);color:#fff}
 .cnt{display:flex;align-items:center;gap:3px;flex:0 0 auto}
 .cnt button{width:30px;height:30px;border-radius:9px;background:var(--card2);border:1px solid var(--line);font-size:17px;font-weight:700}
-.cnt span{font-family:'Reem Kufi',serif;font-size:16px;min-width:56px;text-align:center}
-.cnt span i{font-style:normal;font-size:10px;font-family:'IBM Plex Sans Arabic';font-weight:600;color:var(--ink3)}
+.cnt span{font-family:'Thmanyah',serif;font-size:16px;min-width:56px;text-align:center}
+.cnt span i{font-style:normal;font-size:10px;font-family:'Thmanyah';font-weight:600;color:var(--ink3)}
 textarea.note{width:100%;background:var(--card);border:1px solid var(--line);border-radius:15px;padding:12px;font-size:14px;font-weight:500;line-height:1.9;color:var(--ink);resize:vertical;box-shadow:var(--shadow)}
 textarea.note:focus,input.in:focus{outline:none;border-color:var(--accent)}
 
@@ -163,28 +169,28 @@ textarea.note:focus,input.in:focus{outline:none;border-color:var(--accent)}
 .sheet{width:100%;max-width:560px;max-height:94vh;display:flex;flex-direction:column;background:var(--sheet);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.4);animation:up .26s ease}
 @keyframes up{from{transform:translateY(26px);opacity:0}to{transform:none;opacity:1}}
 .shead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;background:var(--accent);color:#fff}
-.shead b{font-family:'Reem Kufi',serif;font-size:22px;font-weight:500}
+.shead b{font-family:'Thmanyah',serif;font-size:22px;font-weight:500}
 .shead em{font-style:normal;font-size:11.5px;font-weight:600;opacity:.85}
 .shead button{width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,.16);font-size:17px}
 .sbody{padding:14px 15px;overflow:auto}
 .grp{margin-bottom:15px}
 .gtit{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:7px}
-.gtit b{font-family:'Reem Kufi',serif;font-size:16px;font-weight:500}
+.gtit b{font-family:'Thmanyah',serif;font-size:16px;font-weight:500}
 .gtit em{font-style:normal;font-size:10.5px;font-weight:700;color:var(--ink3)}
 .opts{display:flex;flex-direction:column;gap:5px}
 .opt{display:flex;align-items:center;gap:9px;width:100%;text-align:right;padding:10px 11px;border:1.5px solid var(--line);border-radius:12px;background:var(--card2);font-size:14px;font-weight:600}
 .opt .sw{width:11px;height:11px;border-radius:4px;flex:0 0 auto}
-.opt b{margin-right:auto;font-family:'Reem Kufi',serif;font-size:16px;font-weight:500;color:var(--ink3)}
+.opt b{margin-right:auto;font-family:'Thmanyah',serif;font-size:16px;font-weight:500;color:var(--ink3)}
 .opt.on{color:#fff;border-color:transparent}
 .opt.on .sw{background:rgba(255,255,255,.85)!important}
 .opt.on b{color:rgba(255,255,255,.9)}
 .noratiba{font-size:12.5px;font-weight:600;color:var(--ink3);padding:8px 2px}
 .sfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 15px;border-top:1px solid var(--line);background:var(--card2)}
-.stot{font-family:'Reem Kufi',serif;font-size:23px;line-height:1.2}
-.stot i{font-style:normal;font-size:11px;font-family:'IBM Plex Sans Arabic';font-weight:600;color:var(--ink3)}
-.stot em{display:block;font-style:normal;font-size:10.5px;font-family:'IBM Plex Sans Arabic';font-weight:700;color:var(--s6)}
+.stot{font-family:'Thmanyah',serif;font-size:23px;line-height:1.2}
+.stot i{font-style:normal;font-size:11px;font-family:'Thmanyah';font-weight:600;color:var(--ink3)}
+.stot em{display:block;font-style:normal;font-size:10.5px;font-family:'Thmanyah';font-weight:700;color:var(--s6)}
 .btns{display:flex;gap:7px}
-.btn{padding:11px 17px;border-radius:13px;background:var(--accent);color:#fff;font-family:'Reem Kufi',serif;font-size:16px;font-weight:500;transition:transform .07s}
+.btn{padding:11px 17px;border-radius:13px;background:var(--accent);color:#fff;font-family:'Thmanyah',serif;font-size:16px;font-weight:500;transition:transform .07s}
 .btn:active{transform:translateY(2px)}
 .btn:disabled{opacity:.38}
 .btn.sm{padding:9px 13px;font-size:14px}
@@ -198,15 +204,15 @@ textarea.note:focus,input.in:focus{outline:none;border-color:var(--accent)}
 .chip.sm{padding:5px 11px;font-size:11.5px}
 .stats{display:flex;gap:6px;margin-top:11px}
 .st{flex:1;padding:10px 5px;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
-.st b{display:block;font-family:'Reem Kufi',serif;font-size:21px;line-height:1.15;color:var(--accent)}
+.st b{display:block;font-family:'Thmanyah',serif;font-size:21px;line-height:1.15;color:var(--accent)}
 .st span{display:block;font-size:10.5px;font-weight:700;margin-top:2px}
 .st i{display:block;font-style:normal;font-size:9.5px;font-weight:600;color:var(--ink3)}
 .chart{padding:10px 6px 4px}
 .chead{display:flex;justify-content:space-between;align-items:baseline;padding:0 8px 6px;font-size:11px;font-weight:700;color:var(--ink2)}
-.chead b{font-family:'Reem Kufi',serif;font-size:16px;margin:0 3px}
+.chead b{font-family:'Thmanyah',serif;font-size:16px;margin:0 3px}
 .cal{padding:12px}
 .calhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
-.calhead b{font-family:'Reem Kufi',serif;font-size:16px;font-weight:500}
+.calhead b{font-family:'Thmanyah',serif;font-size:16px;font-weight:500}
 .calhead button{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);font-size:16px;color:var(--ink2)}
 .calhead button:disabled{opacity:.25}
 .grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
@@ -220,16 +226,16 @@ textarea.note:focus,input.in:focus{outline:none;border-color:var(--accent)}
 .lg i{width:12px;height:12px;border-radius:4px}
 .rank{padding:12px;display:flex;flex-direction:column;gap:9px}
 .rrow{display:flex;align-items:center;gap:9px}
-.rrow span{flex:0 0 52px;font-family:'Reem Kufi',serif;font-size:14px;font-weight:500}
+.rrow span{flex:0 0 52px;font-family:'Thmanyah',serif;font-size:14px;font-weight:500}
 .rbar{flex:1;height:11px;border-radius:99px;background:var(--line2);overflow:hidden}
 .rbar>i{display:block;height:100%;border-radius:99px;transition:width .4s}
-.rrow b{flex:0 0 40px;text-align:left;font-family:'Reem Kufi',serif;font-size:14px;font-weight:500;color:var(--ink2)}
+.rrow b{flex:0 0 40px;text-align:left;font-family:'Thmanyah',serif;font-size:14px;font-weight:500;color:var(--ink2)}
 .wkrow{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--line2)}
 .wkrow:last-child{border-bottom:none}
 .wkrow span{flex:0 0 104px;font-size:11px;font-weight:700;color:var(--ink2)}
-.wkrow b{flex:0 0 44px;text-align:left;font-family:'Reem Kufi',serif;font-size:15px;font-weight:500}
+.wkrow b{flex:0 0 44px;text-align:left;font-family:'Thmanyah',serif;font-size:15px;font-weight:500}
 .ngroup{padding:11px 13px;margin-bottom:8px}
-.ndate{font-family:'Reem Kufi',serif;font-size:14px;color:var(--accent);margin-bottom:5px;font-weight:500}
+.ndate{font-family:'Thmanyah',serif;font-size:14px;color:var(--accent);margin-bottom:5px;font-weight:500}
 .nitem{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-top:1px solid var(--line2)}
 .nitem:first-of-type{border-top:none}
 .nwho{flex:0 0 auto;font-size:9.5px;font-weight:700;padding:3px 8px;border-radius:99px;background:var(--line2);color:var(--ink2);margin-top:2px}
@@ -239,7 +245,7 @@ textarea.note:focus,input.in:focus{outline:none;border-color:var(--accent)}
 .ref{padding:13px}
 .rline{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;font-weight:600;padding:7px 0;border-bottom:1px solid var(--line2)}
 .rline:last-child{border-bottom:none}
-.rline b{font-family:'Reem Kufi',serif;font-size:15px;font-weight:500;color:var(--accent);white-space:nowrap}
+.rline b{font-family:'Thmanyah',serif;font-size:15px;font-weight:500;color:var(--accent);white-space:nowrap}
 .rline.sum{color:var(--gold)}
 .rline.sum b{color:var(--gold)}
 .box{padding:12px;display:flex;flex-direction:column;gap:9px;margin-top:9px}
@@ -257,7 +263,7 @@ textarea.note:focus,input.in:focus{outline:none;border-color:var(--accent)}
 .authwrap{min-height:88vh;display:flex;align-items:center;justify-content:center;padding:14px 0}
 .authcard{width:100%;max-width:360px;padding:24px 22px}
 .authcard .mark{margin:0 auto 14px}
-.authcard h2{font-family:'Reem Kufi',serif;font-size:21px;text-align:center;margin:0 0 3px;font-weight:500}
+.authcard h2{font-family:'Thmanyah',serif;font-size:21px;text-align:center;margin:0 0 3px;font-weight:500}
 .authcard p.sub{text-align:center;font-size:11.5px;color:var(--ink2);margin:0 0 16px;font-weight:600}
 .authcard .in{margin-bottom:9px}
 .aerr{background:color-mix(in srgb, var(--s0) 12%, transparent);color:var(--s0);border-radius:11px;padding:9px 11px;font-size:12px;font-weight:700;margin-bottom:10px;line-height:1.7}
@@ -1074,7 +1080,7 @@ function viewSettings(){
 
   h += '<div class="sect"><h2>الحساب</h2></div>'
      + '<div class="card box">'
-     +   '<div class="hint">مسجّل الدخول بـ: <b style="color:var(--accent);font-family:\'Reem Kufi\',serif;font-weight:500">'+esc(CLOUD_EMAIL)+'</b></div>'
+     +   '<div class="hint">مسجّل الدخول بـ: <b style="color:var(--accent);font-family:\'Thmanyah\',serif;font-weight:500">'+esc(CLOUD_EMAIL)+'</b></div>'
      +   '<button class="btn dg sm" data-a="signout">تسجيل الخروج</button>'
      + '</div>';
 
@@ -1151,7 +1157,7 @@ function viewSettings(){
      + '<div class="hint">الاستيراد يستبدل كل ما هو موجود — صدّر نسخة أولاً.</div>'
      + '</div>';
 
-  h += '<div class="foot">مِرقاة — سجلّك محفوظ في حسابك، يصلك من أي جهاز.</div></div>';
+  h += '<div class="foot">محاسبة النفس — سجلّك محفوظ في حسابك، يصلك من أي جهاز.</div></div>';
   return h;
 }
 function rl(a,b){ return '<div class="rline"><span>'+a+'</span><b>'+b+'</b></div>'; }
@@ -1170,7 +1176,7 @@ function viewTop(){
   return '<div class="top">'
     + '<div class="brand">'
     +   '<div class="mark">'+markSVG()+'</div>'
-    +   '<div><h1>مِرقاة</h1><p>محاسبة النفس اليومية</p></div>'
+    +   '<div><h1>محاسبة النفس</h1><p>اليومية</p></div>'
     + '</div>'
     + '<div class="wk'+(wTotal>BASE_WEEK?" full":"")+'"><b>'+ar(wTotal)+'</b><span>من '+ar(BASE_WEEK)+' هذا الأسبوع</span></div>'
     + '</div>';
@@ -1200,8 +1206,9 @@ function viewTabs(){
   return '<div class="tabs">'+b("today","اليوم")+b("hist","السجل")+b("set","الضبط")+'</div>';
 }
 function viewLoading(){
-  return '<div class="authwrap"><div style="text-align:center">'
+  return '<div class="authwrap"><div style="text-align:center;max-width:320px;padding:0 18px">'
     + '<div class="mark load" style="width:52px;height:52px;margin:0 auto 14px">'+markSVG()+'</div>'
+    + '<p style="font-size:14.5px;font-weight:500;line-height:2.15;margin:0 0 6px">«حاسبوا أنفسكم قبل أن تُحاسبوا، وزِنُوا أنفسكم قبل أن تُوزنوا»</p>'
     + '<div class="hint">جاري تحميل حسابك…</div>'
     + '</div></div>';
 }
@@ -1209,7 +1216,7 @@ function viewAuth(){
   var a = UI.auth, isSignup = a.mode==="signup";
   var h = '<div class="authwrap"><div class="card authcard">';
   h += '<div class="mark" style="width:52px;height:52px">'+markSVG()+'</div>';
-  h += '<h2>'+(isSignup?"إنشاء حساب في مِرقاة":"الدخول إلى مِرقاة")+'</h2>';
+  h += '<h2>'+(isSignup?"إنشاء حساب في محاسبة النفس":"الدخول إلى محاسبة النفس")+'</h2>';
   h += '<p class="sub">'+(isSignup?"سجلّك يُحفظ ويصلك من أي جهاز":"محاسبة النفس اليومية")+'</p>';
   if(a.err) h += '<div class="aerr">'+esc(a.err)+'</div>';
   if(a.info) h += '<div class="ainfo">'+esc(a.info)+'</div>';
