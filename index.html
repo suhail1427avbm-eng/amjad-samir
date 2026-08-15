@@ -13,9 +13,12 @@
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <style>
 /* ============================================================
-   مِرقاة — محاسبة النفس اليومية
-   ملف واحد مستقل · بلا مكتبات خارجية · يعمل بلا إنترنت
+   محاسبة النفس اليومية
+   ملف واحد مستقل · بلا مكتبات خارجية
    الأسبوع: من السبت إلى الجمعة
+   الصلاة = تبكير ٤ + موضوع ٣ + خشوع ٤ = ١١  (بونص حتى +٢)
+   اليوم  = (١١ × ٥) + ٢ = ٥٧
+   الأسبوع = ٥٧ × ٧ = ٣٩٩
    ============================================================ */
 
 @font-face{font-family:'Thmanyah';src:url('fonts/Thmanyah-Light.woff2') format('woff2');font-weight:300;font-style:normal;font-display:swap}
@@ -56,7 +59,6 @@ body{
 }
 button{font-family:inherit;color:inherit;border:none;background:none;cursor:pointer;padding:0}
 input,textarea,select{font-family:inherit}
-.kufi{font-family:'Thmanyah',serif}
 
 #app{max-width:560px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top)) 14px 104px}
 
@@ -65,7 +67,7 @@ input,textarea,select{font-family:inherit}
 .brand{display:flex;align-items:center;gap:9px}
 .mark{width:38px;height:38px;border-radius:12px;background:var(--accent);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);flex:0 0 auto}
 .mark svg{display:block}
-.brand h1{font-family:'Thmanyah',serif;font-size:25px;margin:0;line-height:1;letter-spacing:.5px}
+.brand h1{font-family:'Thmanyah',serif;font-size:22px;margin:0;line-height:1.15;letter-spacing:.3px}
 .brand p{margin:3px 0 0;font-size:11px;font-weight:600;color:var(--ink2)}
 .wk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:7px 12px;text-align:center;box-shadow:var(--shadow);min-width:104px}
 .wk b{display:block;font-family:'Thmanyah',serif;font-size:21px;line-height:1.1;color:var(--accent)}
@@ -92,7 +94,7 @@ input,textarea,select{font-family:inherit}
 .dcenter i{font-style:normal;font-size:11px;font-weight:600;color:var(--ink2)}
 .dcenter u{display:inline-block;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;margin-top:1px}
 
-/* ---------- الأثر ---------- */
+/* ---------- المقولة ---------- */
 .quote{position:relative;margin-top:11px;padding:15px 17px 13px;border-right:3px solid var(--gold);cursor:pointer;overflow:hidden;background:var(--card2)}
 .quote p{margin:0;font-size:15.5px;font-weight:500;line-height:2.15}
 .quote span{display:block;margin-top:7px;font-size:11.5px;font-weight:700;color:var(--gold)}
@@ -119,40 +121,26 @@ input,textarea,select{font-family:inherit}
 
 /* ---------- الصلوات ---------- */
 .plist{display:flex;flex-direction:column;gap:7px}
-.prow{display:flex;align-items:center;gap:10px;width:100%;text-align:right;padding:11px 13px;background:var(--card);border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow);transition:transform .08s ease}
+.prow{display:flex;align-items:center;gap:9px;width:100%;text-align:right;padding:11px 12px;background:var(--card);border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow);transition:transform .08s ease}
 .prow:active{transform:scale(.988)}
 .prow.bonus{border-color:color-mix(in srgb, var(--s6) 55%, transparent)}
-.pname{font-family:'Thmanyah',serif;font-size:17px;flex:0 0 56px;font-weight:500}
-.pdots{display:flex;gap:5px;flex:1}
-.dot{width:25px;height:25px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
-.dot.off{background:transparent;border:1px dashed var(--line);color:var(--ink3)}
-.dot.plus{width:auto;padding:0 7px;background:var(--s6);font-family:'Thmanyah',serif}
+.pname{font-family:'Thmanyah',serif;font-size:17px;flex:0 0 52px;font-weight:500}
+.pdots{display:flex;gap:4px;flex:1;flex-wrap:wrap}
+.tag{padding:3px 8px;border-radius:8px;font-size:10.5px;font-weight:700;color:#fff;white-space:nowrap}
+.tag.off{background:transparent;border:1px dashed var(--line);color:var(--ink3)}
+.tag.plus{background:var(--s6);font-family:'Thmanyah',serif}
 .pscore{font-family:'Thmanyah',serif;font-size:19px;min-width:52px;text-align:left}
 .pscore i{font-style:normal;font-size:10.5px;font-family:'Thmanyah';font-weight:600;color:var(--ink3);margin-right:2px}
 .pscore .add{font-family:'Thmanyah';font-size:12px;font-weight:700;color:var(--accent)}
 
-/* ---------- الأوراد والعادات ---------- */
-.wird{padding:12px;display:flex;flex-direction:column;gap:9px}
+/* ---------- قراءة اليوم ---------- */
+.wline{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 13px}
 .wlab{font-size:13.5px;font-weight:700}
 .wlab i{display:block;font-style:normal;font-size:10.5px;font-weight:600;color:var(--ink2);margin-top:2px}
-.seg{display:flex;gap:5px}
-.seg button{flex:1;padding:9px 6px;border-radius:11px;border:1px solid var(--line);background:var(--card2);font-size:12.5px;font-weight:700;color:var(--ink2)}
-.seg button.on{color:#fff;border-color:transparent}
-.wline{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:9px;border-top:1px solid var(--line2)}
 .tog{width:52px;height:30px;border-radius:99px;background:var(--line2);position:relative;border:1px solid var(--line);flex:0 0 auto;transition:background .18s}
 .tog i{position:absolute;top:2px;right:2px;width:24px;height:24px;border-radius:50%;background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .18s ease}
 .tog.on{background:var(--s4);border-color:transparent}
 .tog.on i{transform:translateX(-22px);background:#fff}
-.hrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 13px;background:var(--card);border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow)}
-.hrow.ok{border-color:color-mix(in srgb, var(--s4) 55%, transparent)}
-.hname{font-size:14px;font-weight:700;min-width:0}
-.hname i{display:block;font-style:normal;font-size:10.5px;font-weight:600;color:var(--ink2);margin-top:2px}
-.chk{width:32px;height:32px;border-radius:10px;border:2px solid var(--line);font-size:16px;color:var(--ink3);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
-.chk.on{background:var(--s4);border-color:var(--s4);color:#fff}
-.cnt{display:flex;align-items:center;gap:3px;flex:0 0 auto}
-.cnt button{width:30px;height:30px;border-radius:9px;background:var(--card2);border:1px solid var(--line);font-size:17px;font-weight:700}
-.cnt span{font-family:'Thmanyah',serif;font-size:16px;min-width:56px;text-align:center}
-.cnt span i{font-style:normal;font-size:10px;font-family:'Thmanyah';font-weight:600;color:var(--ink3)}
 textarea.note{width:100%;background:var(--card);border:1px solid var(--line);border-radius:15px;padding:12px;font-size:14px;font-weight:500;line-height:1.9;color:var(--ink);resize:vertical;box-shadow:var(--shadow)}
 textarea.note:focus,input.in:focus{outline:none;border-color:var(--accent)}
 
@@ -178,13 +166,25 @@ textarea.note:focus,input.in:focus{outline:none;border-color:var(--accent)}
 .gtit b{font-family:'Thmanyah',serif;font-size:16px;font-weight:500}
 .gtit em{font-style:normal;font-size:10.5px;font-weight:700;color:var(--ink3)}
 .opts{display:flex;flex-direction:column;gap:5px}
-.opt{display:flex;align-items:center;gap:9px;width:100%;text-align:right;padding:10px 11px;border:1.5px solid var(--line);border-radius:12px;background:var(--card2);font-size:14px;font-weight:600}
+.opt{position:relative;display:flex;align-items:center;gap:9px;width:100%;text-align:right;padding:10px 11px;border:1.5px solid var(--line);border-radius:12px;background:var(--card2);font-size:14px;font-weight:600;overflow:hidden}
 .opt .sw{width:11px;height:11px;border-radius:4px;flex:0 0 auto}
 .opt b{margin-right:auto;font-family:'Thmanyah',serif;font-size:16px;font-weight:500;color:var(--ink3)}
 .opt.on{color:#fff;border-color:transparent}
 .opt.on .sw{background:rgba(255,255,255,.85)!important}
 .opt.on b{color:rgba(255,255,255,.9)}
 .noratiba{font-size:12.5px;font-weight:600;color:var(--ink3);padding:8px 2px}
+
+/* بريق الامتياز — عند اختيار الدرجة العليا */
+.opt.top.on{box-shadow:0 0 0 2px color-mix(in srgb,var(--s6) 45%,transparent),0 6px 22px color-mix(in srgb,var(--s6) 40%,transparent);animation:pop .32s ease}
+.opt.top.on::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 48%,transparent 62%);
+  transform:translateX(-120%);animation:shine 1.5s ease .05s 1}
+@keyframes shine{to{transform:translateX(120%)}}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.035)}100%{transform:scale(1)}}
+.spark{position:absolute;pointer-events:none;font-size:13px;line-height:1;opacity:0;animation:sparkle 1.1s ease forwards}
+@keyframes sparkle{0%{opacity:0;transform:scale(.4) rotate(0)}35%{opacity:1;transform:scale(1.15) rotate(18deg)}100%{opacity:0;transform:scale(.7) rotate(40deg) translateY(-10px)}}
+.stot.glow{text-shadow:0 0 18px color-mix(in srgb,var(--s6) 70%,transparent)}
+
 .sfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 15px;border-top:1px solid var(--line);background:var(--card2)}
 .stot{font-family:'Thmanyah',serif;font-size:23px;line-height:1.2}
 .stot i{font-style:normal;font-size:11px;font-family:'Thmanyah';font-weight:600;color:var(--ink3)}
@@ -221,6 +221,7 @@ textarea.note:focus,input.in:focus{outline:none;border-color:var(--accent)}
 .cell.has{color:#fff;border-color:transparent}
 .cell.now{box-shadow:0 0 0 2px var(--gold)}
 .cell.blank{border:none;background:none}
+.cell:disabled{opacity:.3}
 .legend{display:flex;flex-wrap:wrap;gap:9px;margin-top:11px;justify-content:center}
 .lg{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--ink2)}
 .lg i{width:12px;height:12px;border-radius:4px}
@@ -251,10 +252,6 @@ textarea.note:focus,input.in:focus{outline:none;border-color:var(--accent)}
 .box{padding:12px;display:flex;flex-direction:column;gap:9px;margin-top:9px}
 .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .in{background:var(--card2);border:1.5px solid var(--line);border-radius:11px;padding:10px 12px;font-size:14px;font-weight:600;color:var(--ink);width:100%}
-.in.num{width:76px;text-align:center}
-.in.mid{width:110px}
-.del{padding:6px 11px;border-radius:9px;font-size:11.5px;font-weight:700;color:var(--s0);background:color-mix(in srgb, var(--s0) 12%, transparent)}
-.del.on{background:var(--s0);color:#fff}
 .swap{display:flex;gap:5px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:4px}
 .swap button{flex:1;padding:8px;border-radius:9px;font-size:13px;font-weight:700;color:var(--ink2)}
 .swap button.on{background:var(--accent);color:#fff}
@@ -293,10 +290,6 @@ import {
   persistentLocalCache, persistentSingleTabManager
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-/* ============================================================
-   ربط مِرقاة بحساب المستخدم على Firebase — كل جهاز يدخل بنفس
-   البريد وكلمة المرور يرى نفس السجل.
-   ============================================================ */
 var firebaseConfig = {
   apiKey: "AIzaSyBjkvARmuOcz3REUaUvNJ9YwtaU5-Wi1qU",
   authDomain: "amjad-samir.firebaseapp.com",
@@ -314,81 +307,70 @@ var dbFs = initializeFirestore(fbApp, {
 
 /* ============================================================
    [١] النظام والثوابت
-   ------------------------------------------------------------
-   الصلاة   = حضور ٤ + خشوع ٤ + أذكار ٣ = ١١   (بونص حتى +٢)
-   الأوراد  = قرآن ٣ + صباح ١ + مساء ١ = ٥
-   اليوم    = (١١ × ٥) + ٥ = ٦٠
-   الأسبوع  = ٦٠ × ٧ = ٤٢٠   (من السبت إلى الجمعة)
+   الصلاة  = تبكير ٤ + موضوع ٣ + خشوع ٤ = ١١   (بونص حتى +٢)
+   اليوم   = (١١ × ٥) + ٢ = ٥٧
+   الأسبوع = ٥٧ × ٧ = ٣٩٩   (من السبت إلى الجمعة)
    ============================================================ */
 
-var BASE_PRAYER = 11, BASE_WIRD = 5, BASE_DAY = 60, BASE_WEEK = 420;
+var BASE_PRAYER = 11, BASE_READ = 2, BASE_DAY = 57, BASE_WEEK = 399;
 var STREAK_RATIO = 0.7;
 var KEY = "mirqat:v1";
 
+/* الراتبة البعدية: الظهر والمغرب والعشاء فقط */
 var PRAYERS = [
-  { id:"fajr",    name:"الفجر",  ratiba:true,  rlabel:"سنة الفجر" },
-  { id:"dhuhr",   name:"الظهر",  ratiba:true,  rlabel:"راتبة الظهر" },
+  { id:"fajr",    name:"الفجر",  ratiba:false, rlabel:"" },
+  { id:"dhuhr",   name:"الظهر",  ratiba:true,  rlabel:"الراتبة البعدية (الظهر)" },
   { id:"asr",     name:"العصر",  ratiba:false, rlabel:"" },
-  { id:"maghrib", name:"المغرب", ratiba:true,  rlabel:"راتبة المغرب" },
-  { id:"isha",    name:"العشاء", ratiba:true,  rlabel:"راتبة العشاء" }
+  { id:"maghrib", name:"المغرب", ratiba:true,  rlabel:"الراتبة البعدية (المغرب)" },
+  { id:"isha",    name:"العشاء", ratiba:true,  rlabel:"الراتبة البعدية (العشاء)" }
 ];
 
 var AXES = {
-  a:{ key:"a", title:"الحضور والتبكير", need:4, opts:[
-      {v:6,l:"أدركت تكبيرة الإحرام مع الإمام"},
-      {v:4,l:"أدركت الجماعة من أولها"},
-      {v:2,l:"لحقت بعض الجماعة"},
-      {v:1,l:"صليتها في وقتها منفرداً"},
-      {v:0,l:"خرج وقتها"} ] },
-  k:{ key:"k", title:"الخشوع وحضور القلب", need:4, opts:[
-      {v:6,l:"حاضر القلب في أكثرها مع تدبّر"},
-      {v:4,l:"حاضر في أغلبها"},
-      {v:2,l:"بين حضور وشرود"},
-      {v:1,l:"شرود كثير"},
-      {v:0,l:"لم أحضر قلبي" } ] },
-  z:{ key:"z", title:"أذكار ما بعد الصلاة", need:3, opts:[
-      {v:3,l:"أتممت الأذكار"},
-      {v:1,l:"شيء منها"},
-      {v:0,l:"لم أذكر"} ] }
+  e:{ key:"e", title:"التبكير", short:"التبكير", need:4, opts:[
+      {v:6,l:"على الأذان أو قبله"},
+      {v:4,l:"بعيد الأذان (٧ د)"},
+      {v:2,l:"أدركت تحية المسجد"},
+      {v:1,l:"لم أصل تحية المسجد"},
+      {v:0,l:"لم أدرك التكبيرة"} ] },
+  m:{ key:"m", title:"تحديد موضوع الصلاة", short:"الموضوع", need:3, opts:[
+      {v:3,l:"تم"},
+      {v:0,l:"لم يتم"} ] },
+  k:{ key:"k", title:"الخشوع", short:"الخشوع", need:4, opts:[
+      {v:6,l:"خشوع عالي"},
+      {v:4,l:"خشوع في الغالب"},
+      {v:2,l:"متوسط"},
+      {v:1,l:"قليل من الخشوع"},
+      {v:0,l:"لم أخشع"} ] }
 };
-
-var WIRD_Q = [ {v:3,l:"أتممت الورد"}, {v:1,l:"شيء منه"}, {v:0,l:"لم أقرأ"} ];
+var AXIS_KEYS = ["e","m","k"];
 
 var ATHAR = [
-  {t:"يَا أَيُّهَا الَّذِينَ آمَنُوا اتَّقُوا اللَّهَ وَلْتَنظُرْ نَفْسٌ مَّا قَدَّمَتْ لِغَدٍ", s:"الحشر ١٨"},
-  {t:"بَلِ الْإِنسَانُ عَلَىٰ نَفْسِهِ بَصِيرَةٌ", s:"القيامة ١٤"},
   {t:"إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَّوْقُوتًا", s:"النساء ١٠٣"},
   {t:"قَدْ أَفْلَحَ الْمُؤْمِنُونَ ۝ الَّذِينَ هُمْ فِي صَلَاتِهِمْ خَاشِعُونَ", s:"المؤمنون ١–٢"},
   {t:"وَالَّذِينَ هُمْ عَلَىٰ صَلَاتِهِمْ يُحَافِظُونَ", s:"المعارج ٣٤"},
   {t:"وَاسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ ۚ وَإِنَّهَا لَكَبِيرَةٌ إِلَّا عَلَى الْخَاشِعِينَ", s:"البقرة ٤٥"},
   {t:"وَأَقِمِ الصَّلَاةَ لِذِكْرِي", s:"طه ١٤"},
-  {t:"فَاسْتَبِقُوا الْخَيْرَاتِ", s:"البقرة ١٤٨"},
-  {t:"وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ", s:"النجم ٣٩"},
-  {t:"فَمَن يَعْمَلْ مِثْقَالَ ذَرَّةٍ خَيْرًا يَرَهُ", s:"الزلزلة ٧"},
-  {t:"قَدْ أَفْلَحَ مَن زَكَّاهَا ۝ وَقَدْ خَابَ مَن دَسَّاهَا", s:"الشمس ٩–١٠"},
-  {t:"وَفِي أَنفُسِكُمْ ۚ أَفَلَا تُبْصِرُونَ", s:"الذاريات ٢١"},
-  {t:"إِنَّ الْحَسَنَاتِ يُذْهِبْنَ السَّيِّئَاتِ", s:"هود ١١٤"},
-  {t:"وَاذْكُر رَّبَّكَ فِي نَفْسِكَ تَضَرُّعًا وَخِيفَةً", s:"الأعراف ٢٠٥"},
+  {t:"حَافِظُوا عَلَى الصَّلَوَاتِ وَالصَّلَاةِ الْوُسْطَىٰ وَقُومُوا لِلَّهِ قَانِتِينَ", s:"البقرة ٢٣٨"},
+  {t:"وَأْمُرْ أَهْلَكَ بِالصَّلَاةِ وَاصْطَبِرْ عَلَيْهَا", s:"طه ١٣٢"},
+  {t:"إِنَّ الصَّلَاةَ تَنْهَىٰ عَنِ الْفَحْشَاءِ وَالْمُنكَرِ", s:"العنكبوت ٤٥"},
+  {t:"فَوَيْلٌ لِّلْمُصَلِّينَ ۝ الَّذِينَ هُمْ عَن صَلَاتِهِمْ سَاهُونَ", s:"الماعون ٤–٥"},
+  {t:"الَّذِينَ هُمْ عَلَىٰ صَلَاتِهِمْ دَائِمُونَ", s:"المعارج ٢٣"},
   {t:"أول ما يُحاسب به العبد يوم القيامة من عمله صلاته", s:"النبي ﷺ — رواه الترمذي"},
   {t:"وجُعلت قرة عيني في الصلاة", s:"النبي ﷺ — رواه النسائي"},
   {t:"أرِحنا بها يا بلال", s:"النبي ﷺ — رواه أبو داود"},
-  {t:"أحبُّ الأعمال إلى الله أدومها وإن قلّ", s:"متفق عليه"},
-  {t:"الكيِّس من دان نفسه وعمل لما بعد الموت", s:"النبي ﷺ — رواه الترمذي"},
-  {t:"لا تزول قدما عبد يوم القيامة حتى يُسأل عن عمره فيم أفناه", s:"النبي ﷺ — رواه الترمذي"},
+  {t:"العهد الذي بيننا وبينهم الصلاة، فمن تركها فقد كفر", s:"النبي ﷺ — رواه الترمذي"},
+  {t:"من صلى البردين دخل الجنة", s:"متفق عليه"},
   {t:"من صلى لله أربعين يوماً في جماعة يدرك التكبيرة الأولى كُتبت له براءتان", s:"رواه الترمذي"},
-  {t:"حاسبوا أنفسكم قبل أن تُحاسبوا، وزِنوا أعمالكم قبل أن تُوزن عليكم", s:"عمر بن الخطاب رضي الله عنه"},
+  {t:"صلاة الرجل في جماعة تضعّف على صلاته في بيته وسوقه خمساً وعشرين ضعفاً", s:"متفق عليه"},
+  {t:"أثقل الصلاة على المنافقين صلاة العشاء وصلاة الفجر", s:"متفق عليه"},
+  {t:"مثل الصلوات الخمس كمثل نهر جارٍ غمر على باب أحدكم يغتسل منه كل يوم خمس مرات", s:"رواه مسلم"},
   {t:"إن أهم أمركم عندي الصلاة، فمن حفظها وحافظ عليها حفظ دينه", s:"عمر بن الخطاب رضي الله عنه"},
-  {t:"المؤمن قوّامٌ على نفسه، يحاسب نفسه لله", s:"الحسن البصري"},
+  {t:"حاسبوا أنفسكم قبل أن تُحاسبوا، وزِنوا أنفسكم قبل أن تُوزنوا", s:"عمر بن الخطاب رضي الله عنه"},
+  {t:"الصلاة قرة عيون المحبين، ولذة أرواح الموحدين", s:"ابن القيم — الوابل الصيب"},
+  {t:"ما من عمل أحبَّ إلى الله من الصلاة في وقتها", s:"من كلام السلف"},
+  {t:"إذا لم يكن لك في صلاتك قلب، فأي شيء بقي لك منها؟", s:"من كلام السلف"},
   {t:"النفس إن لم تشغلها بالحق شغلتك بالباطل", s:"ابن القيم"},
-  {t:"الصلاة قرة عيون المحبين، ولذة أرواح الموحدين", s:"ابن القيم — الوابل الصيب"}
-];
-
-var DEFAULT_HABITS = [
-  { id:"h1", name:"الاستغفار",           type:"count", target:100, unit:"مرة", points:2 },
-  { id:"h2", name:"الصلاة على النبي ﷺ",  type:"count", target:100, unit:"مرة", points:2 },
-  { id:"h3", name:"قيام الليل",           type:"check", target:1,   unit:"",    points:3 },
-  { id:"h4", name:"صدقة اليوم",           type:"check", target:1,   unit:"",    points:1 },
-  { id:"h5", name:"مراجعة الحفظ",         type:"check", target:1,   unit:"",    points:2 }
+  {t:"من حفظ الصلاة في وقتها حفظه الله في دنياه وأخراه", s:"من كلام السلف"}
 ];
 
 /* ============================================================
@@ -410,6 +392,7 @@ function shift(s,n){ var d=parse(s); d.setDate(d.getDate()+n); return key(d); }
 function today(){ return key(new Date()); }
 function longDate(s){ var d=parse(s); return DAYS[d.getDay()]+" "+ar(d.getDate())+" "+MONTHS[d.getMonth()]+" "+ar(d.getFullYear()); }
 function shortDate(s){ var d=parse(s); return ar(d.getDate())+"/"+ar(d.getMonth()+1); }
+/* بداية الأسبوع = السبت */
 function weekStart(s){ var d=parse(s); d.setDate(d.getDate()-((d.getDay()+1)%7)); return key(d); }
 function monthName(mk){ var p=mk.split("-"); return MONTHS[+p[1]-1]+" "+ar(p[0]); }
 function arDays(n){
@@ -420,7 +403,6 @@ function arDays(n){
   return ar(n)+" يوماً";
 }
 
-function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
 function scaleColor(v){
   if(v>=6) return "var(--s6)";
   if(v>=4) return "var(--s4)";
@@ -428,7 +410,9 @@ function scaleColor(v){
   if(v>=1) return "var(--s1)";
   return "var(--s0)";
 }
-function threeColor(v){ return v>=3 ? "var(--s4)" : v>=1 ? "var(--s2)" : "var(--s0)"; }
+/* محور من خيارين: أخضر وأحمر فقط */
+function binColor(v){ return v>0 ? "var(--s4)" : "var(--s0)"; }
+function axisColor(axKey, v){ return AXES[axKey].opts.length===2 ? binColor(v) : scaleColor(v); }
 function ratioColor(val, base){
   if(val==null) return "var(--line2)";
   var r = base ? val/base : 0;
@@ -443,23 +427,22 @@ function ratioColor(val, base){
    [٣] الحالة والتخزين
    ============================================================ */
 var S = {
-  cfg:{ start:"", theme:"light", quran:{target:5,unit:"صفحة"}, habits:DEFAULT_HABITS.slice() },
+  cfg:{ start:"", theme:"light", name:"" },
   days:{}
 };
 var UI = {
   tab:"today", cursor:today(), athar:0, sheet:null,
-  metric:"total", range:30, mode:"day", month:today().slice(0,7),
-  confirm:null, msg:"", form:{ name:"", type:"check", target:1, points:2, unit:"" },
+  metric:"total", range:30, mode:"day", chart:"line", month:today().slice(0,7),
+  confirm:null, msg:"",
   auth:{ mode:"login", email:"", password:"", password2:"", busy:false, err:"", info:"" }
 };
 
-/* حالة الدخول: loading (جاري التحقق) | signedout (شاشة الدخول) | signedin (التطبيق) */
 var AUTH_STATE = "loading";
 var CLOUD_UID = null;
 var CLOUD_EMAIL = "";
 
 function defaultCfg(){
-  return { start: weekStart(today()), theme:"light", quran:{target:5,unit:"صفحة"}, habits:DEFAULT_HABITS.slice() };
+  return { start: today(), theme:"light", name:"" };
 }
 
 async function bootCloudData(){
@@ -468,24 +451,14 @@ async function bootCloudData(){
   if(snap.exists()){
     var data = snap.data() || {};
     S.cfg = Object.assign(defaultCfg(), data.cfg || {});
-    if(!Array.isArray(S.cfg.habits)) S.cfg.habits = DEFAULT_HABITS.slice();
-    if(!S.cfg.quran) S.cfg.quran = {target:5,unit:"صفحة"};
     S.days = data.days || {};
   }else{
-    /* أول دخول: لو فيه سجل قديم محفوظ محلياً على هذا الجهاز (نسخة ما قبل السحابة) نرفعه تلقائياً */
-    var legacy = null;
-    try{ var raw = localStorage.getItem(KEY); if(raw) legacy = JSON.parse(raw); }catch(e){}
-    if(legacy && legacy.days && Object.keys(legacy.days).length){
-      S.cfg = Object.assign(defaultCfg(), legacy.cfg || {});
-      if(!Array.isArray(S.cfg.habits)) S.cfg.habits = DEFAULT_HABITS.slice();
-      S.days = legacy.days;
-    }else{
-      S.cfg = defaultCfg();
-      S.days = {};
-    }
+    /* أول دخول: البداية من اليوم */
+    S.cfg = defaultCfg();
+    S.days = {};
     await setDoc(ref, { cfg:S.cfg, days:S.days, updatedAt:Date.now() });
   }
-  if(!S.cfg.start) S.cfg.start = weekStart(today());
+  if(!S.cfg.start) S.cfg.start = today();
   document.documentElement.setAttribute("data-theme", S.cfg.theme==="dark" ? "dark" : "light");
 }
 
@@ -529,7 +502,6 @@ async function handleAuthSubmit(){
   try{
     if(a.mode==="signup") await createUserWithEmailAndPassword(auth, email, pass);
     else await signInWithEmailAndPassword(auth, email, pass);
-    /* onAuthStateChanged سيكمل تحميل البيانات ورسم الشاشة */
   }catch(e){
     a.busy = false; a.err = authErrMsg(e); render();
   }
@@ -548,13 +520,12 @@ async function handleForgotPassword(){
   }
   render();
 }
-function blankDay(){ return { p:{}, w:{q:null,sb:0,ms:0}, h:{}, note:"" }; }
+function blankDay(){ return { p:{}, read:0, note:"" }; }
 function getDay(ds){ return S.days[ds] || null; }
 function editDay(ds, fn){
   var d = S.days[ds] ? S.days[ds] : blankDay();
   if(!d.p) d.p = {};
-  if(!d.w) d.w = {q:null,sb:0,ms:0};
-  if(!d.h) d.h = {};
+  if(d.read==null) d.read = 0;
   fn(d);
   S.days[ds] = d;
   save();
@@ -563,41 +534,27 @@ function editDay(ds, fn){
 /* ============================================================
    [٤] الحساب
    ============================================================ */
-function pDone(p){ return !!(p && p.a!=null && p.k!=null && p.z!=null); }
-function pBonus(p){ return p ? (p.r?1:0)+(p.t?1:0) : 0; }
-function pScore(p){ return pDone(p) ? p.a+p.k+p.z+pBonus(p) : 0; }
-function wirdScore(d){
-  if(!d || !d.w) return 0;
-  return (d.w.q||0) + (d.w.sb?1:0) + (d.w.ms?1:0);
-}
+function pDone(p){ return !!(p && p.e!=null && p.m!=null && p.k!=null); }
+function pBonus(p){ return p ? (p.z?1:0)+(p.r?1:0) : 0; }
+function pScore(p){ return pDone(p) ? p.e+p.m+p.k+pBonus(p) : 0; }
+function readScore(d){ return d && d.read ? BASE_READ : 0; }
 function dayScore(d){
   if(!d) return 0;
-  var s = wirdScore(d);
+  var s = readScore(d);
   for(var i=0;i<PRAYERS.length;i++) s += pScore(d.p && d.p[PRAYERS[i].id]);
   return s;
 }
 function dayHasData(d){
   if(!d) return false;
   if(d.note && d.note.trim()) return true;
-  if(wirdScore(d)>0 || (d.w && d.w.q!=null)) return true;
+  if(d.read) return true;
   for(var i=0;i<PRAYERS.length;i++) if(pDone(d.p && d.p[PRAYERS[i].id])) return true;
-  for(var k in (d.h||{})) if(d.h[k]) return true;
   return false;
 }
 function prayersDone(d){
   var n=0; if(!d) return 0;
   for(var i=0;i<PRAYERS.length;i++) if(pDone(d.p && d.p[PRAYERS[i].id])) n++;
   return n;
-}
-function habitScore(d){
-  var got=0, max=0, done=0;
-  S.cfg.habits.forEach(function(h){
-    max += +h.points || 0;
-    var v = (d && d.h && d.h[h.id]) || 0;
-    var ok = h.type==="check" ? v>=1 : v>=h.target;
-    if(ok){ got += +h.points||0; done++; }
-  });
-  return { got:got, max:max, done:done };
 }
 function qualifies(ds){
   var d = getDay(ds);
@@ -623,24 +580,24 @@ function longestStreak(){
 
 /* المقاييس المستعملة في السجل */
 var METRICS = [
-  { id:"total",  name:"الميزان",   pBase:BASE_PRAYER, dBase:BASE_DAY },
-  { id:"a",      name:"الحضور",    pBase:4,  dBase:20 },
-  { id:"k",      name:"الخشوع",    pBase:4,  dBase:20 },
-  { id:"z",      name:"الأذكار",   pBase:3,  dBase:15 },
-  { id:"bonus",  name:"البونص",    pBase:2,  dBase:9  },
-  { id:"wird",   name:"الأوراد",   pBase:0,  dBase:BASE_WIRD }
+  { id:"total",  name:"المجموع العام", pBase:BASE_PRAYER, dBase:BASE_DAY },
+  { id:"e",      name:"التبكير",       pBase:4,  dBase:20 },
+  { id:"k",      name:"الخشوع",        pBase:4,  dBase:20 },
+  { id:"m",      name:"الموضوع",       pBase:3,  dBase:15 },
+  { id:"bonus",  name:"الزيادات",      pBase:2,  dBase:8  },
+  { id:"read",   name:"قراءة اليوم",   pBase:0,  dBase:BASE_READ }
 ];
 function metricOf(id){ for(var i=0;i<METRICS.length;i++) if(METRICS[i].id===id) return METRICS[i]; return METRICS[0]; }
 function pMetric(p, m){
   if(!pDone(p)) return null;
   if(m==="total") return pScore(p);
   if(m==="bonus") return pBonus(p);
-  if(m==="a"||m==="k"||m==="z") return p[m];
+  if(m==="e"||m==="k"||m==="m") return p[m];
   return null;
 }
 function dMetric(d, m){
   if(!d) return null;
-  if(m==="wird")  return dayHasData(d) ? wirdScore(d) : null;
+  if(m==="read")  return dayHasData(d) ? readScore(d) : null;
   if(m==="total") return dayHasData(d) ? dayScore(d)  : null;
   var s=0, any=false;
   PRAYERS.forEach(function(pr){
@@ -649,6 +606,7 @@ function dMetric(d, m){
   });
   return any ? s : null;
 }
+/* الأيام من اليوم رجوعاً — ولا تتجاوز تاريخ البداية أبداً */
 function rangeDays(n){
   var out=[], d=today(), start=S.cfg.start;
   for(var i=0;i<n;i++){ if(d<start) break; out.push(d); d=shift(d,-1); }
@@ -711,6 +669,61 @@ function barsSVG(series, base){
   return out;
 }
 
+/* منحنى التقدم — محورا x و y، الأحدث يساراً */
+function lineSVG(series, base){
+  var W=340, H=190, padT=16, padB=30, padL=10, padR=30;
+  var n = series.length;
+  if(!n) return '<div class="empty">لا توجد بيانات في هذه المدة.</div>';
+  var maxV = base;
+  series.forEach(function(s){ if(s.value>maxV) maxV=s.value; });
+  var top = Math.max(1, Math.ceil(maxV*1.14));
+  var plotW = W-padL-padR, plotH = H-padT-padB;
+  var Y = function(v){ return padT + (1 - v/top)*plotH; };
+  /* الأحدث يساراً: i=0 (الأحدث) عند أقصى اليسار */
+  var X = function(i){ return n===1 ? (padL+plotW/2) : (W-padR) - (i/(n-1))*plotW; };
+
+  var out = '<svg viewBox="0 0 '+W+' '+H+'" width="100%" preserveAspectRatio="xMidYMid meet">';
+
+  /* شبكة أفقية + تدريج محور y */
+  [0,0.25,0.5,0.75,1].forEach(function(f){
+    var v = Math.round(top*f);
+    out += '<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--grid)" stroke-width="1"/>';
+    out += '<text x="'+(W-padR+5)+'" y="'+(Y(v)+4)+'" fill="var(--ink3)" font-size="10" font-weight="700" text-anchor="start">'+ar(v)+'</text>';
+  });
+  /* محورا الرسم */
+  out += '<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+(H-padB)+'" y2="'+(H-padB)+'" stroke="var(--ink3)" stroke-width="1.2"/>';
+  out += '<line x1="'+(W-padR)+'" x2="'+(W-padR)+'" y1="'+padT+'" y2="'+(H-padB)+'" stroke="var(--ink3)" stroke-width="1.2"/>';
+  /* خط المطلوب */
+  if(base>0){
+    out += '<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+Y(base)+'" y2="'+Y(base)+'" stroke="var(--gold)" stroke-width="1.4" stroke-dasharray="5 4" opacity="0.9"/>';
+  }
+
+  /* المسار — يتجاهل الأيام غير المسجلة فلا ينكسر الخط */
+  var pts = [];
+  series.forEach(function(s,i){ if(s.has) pts.push({ x:X(i), y:Y(s.value), v:s.value }); });
+
+  if(pts.length>1){
+    var dLine = pts.map(function(p,i){ return (i?"L":"M")+p.x.toFixed(1)+" "+p.y.toFixed(1); }).join(" ");
+    /* تظليل تحت المنحنى */
+    var areaD = dLine + " L "+pts[pts.length-1].x.toFixed(1)+" "+(H-padB)
+              + " L "+pts[0].x.toFixed(1)+" "+(H-padB)+" Z";
+    out += '<path d="'+areaD+'" fill="var(--accent)" opacity="0.11"/>';
+    out += '<path d="'+dLine+'" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>';
+  }
+  pts.forEach(function(p){
+    out += '<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="3.1" fill="'+ratioColor(p.v, base||1)+'" stroke="var(--card)" stroke-width="1.3"/>';
+  });
+
+  /* تدريج محور x */
+  var step = n<=8 ? 1 : Math.ceil(n/6);
+  series.forEach(function(s,i){
+    if(i%step) return;
+    out += '<text x="'+X(i).toFixed(1)+'" y="'+(H-10)+'" fill="var(--ink3)" font-size="9.5" font-weight="700" text-anchor="middle">'+s.label+'</text>';
+  });
+  out += '</svg>';
+  return out;
+}
+
 /* ============================================================
    [٦] شاشة اليوم
    ============================================================ */
@@ -725,7 +738,6 @@ function viewToday(){
   for(var i=0;i<7;i++){ var k=shift(ws,i); week.push(k); wTotal += dayScore(getDay(k)); }
   var yest = dayScore(getDay(shift(ds,-1)));
   var diff = total - yest;
-  var hab = habitScore(d);
   var a = ATHAR[(Math.floor(parse(ds).getTime()/864e5) + UI.athar) % ATHAR.length];
 
   var h = '<div class="screen">';
@@ -739,7 +751,7 @@ function viewToday(){
      +   '<button class="nav-a" data-a="go" data-v="1"'+(ds>=today()?" disabled":"")+'>‹</button>'
      + '</div>';
 
-  /* الأثر */
+  /* مقولة عن الصلاة */
   h += '<div class="card quote" data-a="athar"><p>'+esc(a.t)+'</p><span>'+esc(a.s)+'</span><i>اضغط لغيرها ↻</i></div>';
 
   /* الميزان */
@@ -765,19 +777,18 @@ function viewToday(){
      + ' · سلسلة <b style="color:var(--gold)">'+arDays(currentStreak())+'</b></div>'
      +    '</div></div>';
 
-  /* الصلوات */
+  /* الصلوات — تُعرض الثلاثة الأساسية فقط بأسمائها */
   h += '<div class="sect"><h2>الصلوات الخمس</h2><em>'+ar(prayersDone(d))+' / ٥ مسجّلة</em></div>';
   h += '<div class="plist">';
   PRAYERS.forEach(function(pr){
     var p = d && d.p ? d.p[pr.id] : null;
-    var done = pDone(p), sc = pScore(p), bon = done && sc>BASE_PRAYER;
+    var done = pDone(p), sc = pScore(p), bon = done && pBonus(p)>0;
     h += '<button class="prow'+(bon?" bonus":"")+'" data-a="open" data-v="'+pr.id+'">'
        +   '<span class="pname">'+pr.name+'</span>'
        +   '<span class="pdots">'
-       +     dotHTML("ح", done?p.a:null, "scale")
-       +     dotHTML("خ", done?p.k:null, "scale")
-       +     dotHTML("ذ", done?p.z:null, "three")
-       +     (done && pBonus(p)>0 ? '<span class="dot plus">+'+ar(pBonus(p))+'</span>' : "")
+       +     tagHTML("تبكير", done?p.e:null, "e")
+       +     tagHTML("موضوع", done?p.m:null, "m")
+       +     tagHTML("خشوع",  done?p.k:null, "k")
        +   '</span>'
        +   '<span class="pscore" style="color:'+(done?ratioColor(sc,BASE_PRAYER):"var(--ink3)")+'">'
        +     (done ? ar(sc)+'<i>/ '+ar(BASE_PRAYER)+'</i>' : '<span class="add">سجّل +</span>')
@@ -786,58 +797,24 @@ function viewToday(){
   });
   h += '</div>';
 
-  /* الأوراد */
-  var w = (d && d.w) || {q:null,sb:0,ms:0};
-  h += '<div class="sect"><h2>أوراد اليوم</h2><em>'+ar(wirdScore(d))+' / '+ar(BASE_WIRD)+'</em></div>';
-  h += '<div class="card wird">'
-     +  '<div class="wlab">ورد القرآن<i>الهدف: '+ar(S.cfg.quran.target)+' '+esc(S.cfg.quran.unit||"")+'</i></div>'
-     +  '<div class="seg">';
-  WIRD_Q.forEach(function(o){
-    var on = w.q===o.v;
-    h += '<button class="'+(on?"on":"")+'" data-a="wq" data-v="'+o.v+'"'
-       + (on?' style="background:'+threeColor(o.v)+'"':"")+'>'+o.l+' '+ar(o.v)+'</button>';
-  });
-  h += '</div>'
-     + '<div class="wline"><div class="wlab">أذكار الصباح<i>نقطة واحدة</i></div>'
-     +   '<button class="tog'+(w.sb?" on":"")+'" data-a="wt" data-i="sb"><i></i></button></div>'
-     + '<div class="wline"><div class="wlab">أذكار المساء<i>نقطة واحدة</i></div>'
-     +   '<button class="tog'+(w.ms?" on":"")+'" data-a="wt" data-i="ms"><i></i></button></div>'
-     + '</div>';
-
-  /* العادات */
-  h += '<div class="sect"><h2>العادات</h2><em>'+ar(hab.got)+' / '+ar(hab.max)+' نقطة</em></div>';
-  h += '<div class="plist">';
-  if(!S.cfg.habits.length) h += '<div class="card empty">لا عادات بعد — أضِفها من الضبط.</div>';
-  S.cfg.habits.forEach(function(hb){
-    var v = (d && d.h && d.h[hb.id]) || 0;
-    var ok = hb.type==="check" ? v>=1 : v>=hb.target;
-    h += '<div class="hrow'+(ok?" ok":"")+'">'
-       +   '<div class="hname">'+esc(hb.name)+'<i>'+ar(hb.points)+' نقاط'
-       +     (hb.type==="count" ? ' · الهدف '+ar(hb.target)+' '+esc(hb.unit||"") : "")+'</i></div>';
-    if(hb.type==="check"){
-      h += '<button class="chk'+(ok?" on":"")+'" data-a="hchk" data-i="'+hb.id+'">'+(ok?"✓":"")+'</button>';
-    }else{
-      h += '<div class="cnt">'
-         +   '<button data-a="hdec" data-i="'+hb.id+'">−</button>'
-         +   '<span style="color:'+(ok?"var(--s4)":"var(--ink)")+'">'+ar(v)+'<i>/'+ar(hb.target)+'</i></span>'
-         +   '<button data-a="hinc" data-i="'+hb.id+'">+</button>'
-         + '</div>';
-    }
-    h += '</div>';
-  });
-  h += '</div>';
+  /* قراءة اليوم — مرة واحدة في اليوم */
+  var readOn = !!(d && d.read);
+  h += '<div class="sect"><h2>قراءة اليوم</h2><em>'+ar(readScore(d))+' / '+ar(BASE_READ)+'</em></div>';
+  h += '<div class="card"><div class="wline">'
+     +   '<div class="wlab">قرأت أو سمعت عن الصلاة<i>مرة واحدة في اليوم · '+ar(BASE_READ)+' نقطتان</i></div>'
+     +   '<button class="tog'+(readOn?" on":"")+'" data-a="read"><i></i></button>'
+     + '</div></div>';
 
   /* المحاسبة */
   h += '<div class="sect"><h2>محاسبة اليوم</h2><em>ماذا تُصلح غداً؟</em></div>';
   h += '<textarea class="note" rows="3" data-inp="note" placeholder="ما الذي أضعف صلاتك اليوم؟ وما الذي تعزم عليه غداً؟">'+esc(d&&d.note?d.note:"")+'</textarea>';
-  h += '<div class="foot">يُحفظ كل شيء تلقائياً في حسابك.</div>';
+  h += '<div class="foot">تجد كل ملاحظاتك مجموعة في السجل · يُحفظ كل شيء تلقائياً.</div>';
   h += '</div>';
   return h;
 }
-function dotHTML(label, v, kind){
-  if(v==null) return '<span class="dot off">'+label+'</span>';
-  var c = kind==="three" ? threeColor(v) : scaleColor(v);
-  return '<span class="dot" style="background:'+c+'">'+label+'</span>';
+function tagHTML(label, v, axKey){
+  if(v==null) return '<span class="tag off">'+label+'</span>';
+  return '<span class="tag" style="background:'+axisColor(axKey,v)+'">'+label+' '+ar(v)+'</span>';
 }
 
 /* ============================================================
@@ -848,42 +825,46 @@ function viewSheet(){
   if(!sh) return "";
   var pr = PRAYERS.filter(function(p){ return p.id===sh.pid; })[0];
   var f = sh.draft;
-  var ready = f.a!=null && f.k!=null && f.z!=null;
-  var tot = (f.a||0)+(f.k||0)+(f.z||0)+(f.r?1:0)+(f.t?1:0);
+  var ready = f.e!=null && f.m!=null && f.k!=null;
+  var tot = (f.e||0)+(f.m||0)+(f.k||0)+(f.z?1:0)+(f.r?1:0);
   var over = tot - BASE_PRAYER;
+  var hasTop = f.e===6 || f.k===6;
 
   var h = '<div class="veil" data-a="close"><div class="sheet" data-stop="1">'
         + '<div class="shead"><div><b>'+pr.name+'</b></div><em>'+longDate(sh.ds)+'</em>'
         + '<button data-a="close">✕</button></div>'
         + '<div class="sbody">';
 
-  ["a","k","z"].forEach(function(axKey){
+  AXIS_KEYS.forEach(function(axKey){
     var ax = AXES[axKey];
+    var two = ax.opts.length===2;
     h += '<div class="grp"><div class="gtit"><b>'+ax.title+'</b><em>المطلوب '+ar(ax.need)+'</em></div><div class="opts">';
     ax.opts.forEach(function(o){
       var on = f[axKey]===o.v;
-      var c  = axKey==="z" ? threeColor(o.v) : scaleColor(o.v);
-      h += '<button class="opt'+(on?" on":"")+'" data-a="set" data-i="'+axKey+'" data-v="'+o.v+'"'
+      var c  = two ? binColor(o.v) : scaleColor(o.v);
+      var isTop = !two && o.v===6;
+      h += '<button class="opt'+(isTop?" top":"")+(on?" on":"")+'" data-a="set" data-i="'+axKey+'" data-v="'+o.v+'"'
          + (on?' style="background:'+c+'"':'')+'>'
-         + '<span class="sw" style="background:'+c+'"></span>'+o.l+'<b>'+ar(o.v)+'</b></button>';
+         + '<span class="sw" style="background:'+c+'"></span>'+o.l
+         + '<b>'+(isTop&&on?"✦ ":"")+ar(o.v)+'</b></button>';
     });
     h += '</div></div>';
   });
 
   h += '<div class="grp"><div class="gtit"><b>زيادات</b><em>فوق الـ'+ar(BASE_PRAYER)+'</em></div><div class="opts">';
-  h += '<button class="opt'+(f.t?" on":"")+'" data-a="bon" data-i="t"'+(f.t?' style="background:var(--s6)"':'')+'>'
-     + '<span class="sw" style="background:var(--s6)"></span>تحية المسجد وانتظار الإقامة<b>+'+ar(1)+'</b></button>';
+  h += '<button class="opt'+(f.z?" on":"")+'" data-a="bon" data-i="z"'+(f.z?' style="background:var(--s6)"':'')+'>'
+     + '<span class="sw" style="background:var(--s6)"></span>قراءة الأذكار كاملة في المسجد<b>+'+ar(1)+'</b></button>';
   h += pr.ratiba
      ? '<button class="opt'+(f.r?" on":"")+'" data-a="bon" data-i="r"'+(f.r?' style="background:var(--s6)"':'')+'>'
        + '<span class="sw" style="background:var(--s6)"></span>'+pr.rlabel+'<b>+'+ar(1)+'</b></button>'
-     : '<div class="noratiba">لا راتبة مع العصر.</div>';
+     : '<div class="noratiba">لا راتبة بعدية مع '+pr.name+'.</div>';
   h += '</div></div>';
 
   h += '<div class="grp"><div class="gtit"><b>ملاحظة</b><em>اختيارية</em></div>'
      + '<textarea class="note" rows="2" data-inp="pnote" placeholder="آية وقفت عندها، أو سبب الشرود، أو ما تعزم عليه…">'+esc(f.n||"")+'</textarea></div>';
 
   h += '</div><div class="sfoot">'
-     + '<div class="stot" style="color:'+(ready?ratioColor(tot,BASE_PRAYER):"var(--ink3)")+'">'
+     + '<div class="stot'+(hasTop?" glow":"")+'" style="color:'+(ready?ratioColor(tot,BASE_PRAYER):"var(--ink3)")+'">'
      +   ar(tot)+' <i>/ '+ar(BASE_PRAYER)+'</i>'
      +   (over>0 ? '<em>✦ زيادة '+ar(over)+'</em>' : '')
      + '</div><div class="btns">'
@@ -894,13 +875,32 @@ function viewSheet(){
   return h;
 }
 
+/* بريق عند اختيار الدرجة العليا */
+function burstSparkles(el){
+  if(!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var marks = ["✦","✧","★","✨"];
+  for(var i=0;i<7;i++){
+    (function(i){
+      var s = document.createElement("span");
+      s.className = "spark";
+      s.textContent = marks[i % marks.length];
+      s.style.right = (8 + Math.random()*80) + "%";
+      s.style.top   = (10 + Math.random()*60) + "%";
+      s.style.animationDelay = (i*45) + "ms";
+      s.style.color = i%2 ? "var(--gold)" : "#fff";
+      el.appendChild(s);
+      setTimeout(function(){ s.remove(); }, 1250 + i*45);
+    })(i);
+  }
+}
+
 /* ============================================================
    [٨] شاشة السجل
    ============================================================ */
 function viewHistory(){
   var M = metricOf(UI.metric);
   var days = rangeDays(UI.range);
-  var chrono = days.slice().reverse();
+  var chrono = days.slice();
 
   /* إحصاءات */
   var sum=0, n=0, best=null, bestV=-1, over=0;
@@ -909,17 +909,15 @@ function viewHistory(){
     if(v==null) return;
     sum+=v; n++;
     if(v>bestV){ bestV=v; best=ds; }
-    if(UI.metric!=="wird" && d && d.p) PRAYERS.forEach(function(pr){
+    if(UI.metric!=="read" && d && d.p) PRAYERS.forEach(function(pr){
       var pv = pMetric(d.p[pr.id], UI.metric);
       if(pv!=null && M.pBase && pv>M.pBase) over++;
     });
   });
   var avg = n ? Math.round((sum/n)*10)/10 : 0;
-
-  /* السلسلة */
   var streak = currentStreak(), longest = longestStreak();
 
-  /* المنحنى */
+  /* السلسلة الزمنية — الأحدث أولاً */
   var series;
   if(UI.mode==="day"){
     series = chrono.map(function(ds){
@@ -943,17 +941,17 @@ function viewHistory(){
     var s=0, c=0;
     days.forEach(function(ds){
       var d = getDay(ds);
-      var v = pMetric(d && d.p ? d.p[pr.id] : null, UI.metric==="wird" ? "total" : UI.metric);
+      var v = pMetric(d && d.p ? d.p[pr.id] : null, UI.metric==="read" ? "total" : UI.metric);
       if(v!=null){ s+=v; c++; }
     });
     return { name:pr.name, avg: c ? s/c : null, c:c };
   });
-  var rankBase = (UI.metric==="wird" ? BASE_PRAYER : M.pBase) || 1;
+  var rankBase = (UI.metric==="read" ? BASE_PRAYER : M.pBase) || 1;
   var rankSorted = rank.slice().sort(function(x,y){
     if(x.avg==null) return 1; if(y.avg==null) return -1; return x.avg - y.avg;
   });
 
-  /* الأسابيع */
+  /* الأسابيع — لا تتجاوز البداية */
   var weeks = [], ws = weekStart(today());
   for(var i=0;i<8;i++){
     if(shift(ws,6) < S.cfg.start) break;
@@ -963,7 +961,7 @@ function viewHistory(){
     ws = shift(ws,-7);
   }
 
-  /* الملاحظات */
+  /* الملاحظات — كلها ورا بعض */
   var notes = [];
   days.forEach(function(ds){
     var d = getDay(ds); if(!d) return;
@@ -978,6 +976,7 @@ function viewHistory(){
 
   var h = '<div class="screen">';
 
+  /* اختيار ما يُعرض */
   h += '<div class="chips">';
   METRICS.forEach(function(m){
     h += '<button class="chip'+(UI.metric===m.id?" on":"")+'" data-a="met" data-v="'+m.id+'">'+m.name+'</button>';
@@ -992,23 +991,28 @@ function viewHistory(){
      +  st(n?ar(avg):"—", "المتوسط اليومي", "من "+ar(M.dBase))
      +  st(ar(n), "أيام مسجّلة", "من "+ar(days.length))
      +  st(best?ar(bestV):"—", "أفضل يوم", best?shortDate(best):"")
-     +  (UI.metric==="wird" ? st(ar(streak), "السلسلة", "أطولها "+ar(longest))
+     +  (UI.metric==="read" ? st(ar(streak), "السلسلة", "أطولها "+ar(longest))
                             : st(ar(over), "زيادات", "فوق المطلوب"))
      + '</div>';
 
+  /* المنحنى */
   h += '<div class="sect"><h2>منحنى '+M.name+'</h2><em>'
      + '<button class="chip sm'+(UI.mode==="day"?" on":"")+'" data-a="mode" data-v="day">يومي</button> '
      + '<button class="chip sm'+(UI.mode==="week"?" on":"")+'" data-a="mode" data-v="week">أسبوعي</button></em></div>';
+  h += '<div class="chips" style="margin-bottom:8px">'
+     + '<button class="chip sm'+(UI.chart==="line"?" on":"")+'" data-a="chart" data-v="line">منحنى</button>'
+     + '<button class="chip sm'+(UI.chart==="bar"?" on":"")+'" data-a="chart" data-v="bar">أعمدة</button>'
+     + '</div>';
   h += '<div class="card chart"><div class="chead">'
      +   '<span>الخط الذهبي = المطلوب ('+ar(chartBase)+')</span>'
      +   '<span>الأحدث يساراً</span></div>'
-     +   barsSVG(series, chartBase) + '</div>';
+     +   (UI.chart==="line" ? lineSVG(series, chartBase) : barsSVG(series, chartBase)) + '</div>';
 
   /* الرزنامة */
   h += '<div class="sect"><h2>رزنامة '+M.name+'</h2><em>اضغط يوماً لفتحه</em></div>';
   h += '<div class="card cal">'
      +  '<div class="calhead">'
-     +    '<button data-a="mon" data-v="-1">›</button>'
+     +    '<button data-a="mon" data-v="-1"'+(UI.month<=S.cfg.start.slice(0,7)?" disabled":"")+'>›</button>'
      +    '<b>'+monthName(UI.month)+'</b>'
      +    '<button data-a="mon" data-v="1"'+(UI.month>=today().slice(0,7)?" disabled":"")+'>‹</button>'
      +  '</div><div class="grid7">';
@@ -1018,11 +1022,13 @@ function viewHistory(){
   var off = (first.getDay()+1)%7;
   for(var b=0;b<off;b++) h += '<div class="cell blank"></div>';
   for(var dnum=1;dnum<=dim;dnum++){
-    var ds = yy+"-"+String(mm).padStart(2,"0")+"-"+String(dnum).padStart(2,"0");
-    var v = ds < S.cfg.start || ds > today() ? null : dMetric(getDay(ds), UI.metric);
-    var has = v!=null;
-    h += '<button class="cell'+(has?" has":"")+(ds===today()?" now":"")+'" data-a="hday" data-v="'+ds+'"'
-       + (has?' style="background:'+ratioColor(v, M.dBase)+'"':'')+'>'+ar(dnum)+'</button>';
+    var ds2 = yy+"-"+String(mm).padStart(2,"0")+"-"+String(dnum).padStart(2,"0");
+    var outside = ds2 < S.cfg.start || ds2 > today();
+    var v2 = outside ? null : dMetric(getDay(ds2), UI.metric);
+    var has2 = v2!=null;
+    h += '<button class="cell'+(has2?" has":"")+(ds2===today()?" now":"")+'" data-a="hday" data-v="'+ds2+'"'
+       + (outside?" disabled":"")
+       + (has2?' style="background:'+ratioColor(v2, M.dBase)+'"':'')+'>'+ar(dnum)+'</button>';
   }
   h += '</div><div class="legend">'
      +  lg("var(--s6)","زيادة")+lg("var(--s4)","تام")+lg("var(--s2)","متوسط")
@@ -1051,7 +1057,7 @@ function viewHistory(){
   });
   h += '</div>';
 
-  /* الملاحظات */
+  /* دفتر الملاحظات */
   var cnt = notes.reduce(function(s,x){ return s+x.items.length; },0);
   h += '<div class="sect"><h2>دفتر المحاسبة</h2><em>'+ar(cnt)+' ملاحظة</em></div>';
   if(!notes.length) h += '<div class="card empty">لم تكتب شيئاً بعد.</div>';
@@ -1073,10 +1079,14 @@ function lg(c,t){ return '<span class="lg"><i style="background:'+c+'"></i>'+t+'
    [٩] شاشة الضبط
    ============================================================ */
 function viewSettings(){
-  var f = UI.form;
   var recorded = Object.keys(S.days).filter(function(k){ return dayHasData(S.days[k]); }).length;
 
   var h = '<div class="screen">';
+
+  h += '<div class="sect"><h2>اسمك</h2><em>يظهر في أعلى صفحة اليوم</em></div>'
+     + '<div class="card box">'
+     +   '<input class="in" placeholder="اكتب اسمك" value="'+esc(S.cfg.name||"")+'" data-inp="uname">'
+     + '</div>';
 
   h += '<div class="sect"><h2>الحساب</h2></div>'
      + '<div class="card box">'
@@ -1092,15 +1102,14 @@ function viewSettings(){
 
   h += '<div class="sect"><h2>ميزان النقاط</h2><em>ثابت ومنضبط</em></div>';
   h += '<div class="card ref">'
-     +  rl("الحضور والتبكير","المطلوب ٤ — وأعلاه ٦")
-     +  rl("الخشوع وحضور القلب","المطلوب ٤ — وأعلاه ٦")
-     +  rl("أذكار ما بعد الصلاة","٣")
-     +  rl("تحية المسجد وانتظار الإقامة","زيادة +١")
-     +  rl("الراتبة (لغير العصر)","زيادة +١")
-     +  rl("ورد القرآن","٣")
-     +  rl("أذكار الصباح · أذكار المساء","١ + ١")
+     +  rl("التبكير","المطلوب ٤ — وأعلاه ٦")
+     +  rl("تحديد موضوع الصلاة","٣")
+     +  rl("الخشوع","المطلوب ٤ — وأعلاه ٦")
+     +  rl("قراءة الأذكار كاملة في المسجد","زيادة +١")
+     +  rl("السنة الراتبة البعدية (إن وجدت)","زيادة +١")
+     +  rl("قرأت/سمعت عن الصلاة — مرة في اليوم","٢")
      +  '<div class="rline sum"><span>الصلاة الواحدة</span><b>'+ar(BASE_PRAYER)+'</b></div>'
-     +  '<div class="rline sum"><span>اليوم = (١١ × ٥) + ٥</span><b>'+ar(BASE_DAY)+'</b></div>'
+     +  '<div class="rline sum"><span>اليوم = (١١ × ٥) + ٢</span><b>'+ar(BASE_DAY)+'</b></div>'
      +  '<div class="rline sum"><span>الأسبوع — السبت إلى الجمعة</span><b>'+ar(BASE_WEEK)+'</b></div>'
      +  '<div class="legend">'
      +    lg("var(--s6)","٦ زيادة")+lg("var(--s4)","٤")+lg("var(--s2)","٢")+lg("var(--s1)","١")+lg("var(--s0)","٠")
@@ -1112,38 +1121,6 @@ function viewSettings(){
      + '<div class="card box">'
      +   '<input class="in" type="date" value="'+esc(S.cfg.start)+'" data-inp="start">'
      +   '<div class="hint">لا يعرض السجل أي يوم قبل هذا التاريخ.</div>'
-     + '</div>';
-
-  h += '<div class="sect"><h2>ورد القرآن</h2></div>'
-     + '<div class="card box"><div class="row">'
-     +   '<input class="in num" type="number" min="1" value="'+esc(S.cfg.quran.target)+'" data-inp="qtarget">'
-     +   '<input class="in mid" value="'+esc(S.cfg.quran.unit||"")+'" placeholder="الوحدة" data-inp="qunit">'
-     + '</div><div class="hint">هذا هدفك الشخصي، والنقاط ثابتة: ٣ للتمام، ١ للبعض.</div></div>';
-
-  h += '<div class="sect"><h2>العادات</h2><em>'+ar(S.cfg.habits.length)+'</em></div>';
-  h += '<div class="plist">';
-  if(!S.cfg.habits.length) h += '<div class="card empty">لا عادات.</div>';
-  S.cfg.habits.forEach(function(hb){
-    h += '<div class="hrow"><div class="hname">'+esc(hb.name)
-       +   '<i>'+(hb.type==="check" ? "تحقُّق" : "عدّاد · الهدف "+ar(hb.target)+" "+esc(hb.unit||""))
-       +   ' · '+ar(hb.points)+' نقاط</i></div>'
-       +   '<button class="del'+(UI.confirm===hb.id?" on":"")+'" data-a="delh" data-i="'+hb.id+'">'
-       +     (UI.confirm===hb.id?"تأكيد الحذف":"حذف")+'</button></div>';
-  });
-  h += '</div>';
-
-  h += '<div class="card box">'
-     +  '<input class="in" placeholder="اسم العادة" value="'+esc(f.name)+'" data-inp="hname">'
-     +  '<div class="row">'
-     +    '<button class="chip sm'+(f.type==="check"?" on":"")+'" data-a="htype" data-v="check">تحقُّق</button>'
-     +    '<button class="chip sm'+(f.type==="count"?" on":"")+'" data-a="htype" data-v="count">عدّاد</button>'
-     +    (f.type==="count"
-        ? '<input class="in num" type="number" min="1" value="'+esc(f.target)+'" data-inp="htarget" title="الهدف">'
-          +'<input class="in mid" placeholder="الوحدة" value="'+esc(f.unit)+'" data-inp="hunit">'
-        : '')
-     +    '<input class="in num" type="number" min="1" value="'+esc(f.points)+'" data-inp="hpoints" title="النقاط">'
-     +  '</div>'
-     +  '<button class="btn sm" data-a="addh">أضف عادة</button>'
      + '</div>';
 
   h += '<div class="sect"><h2>النسخ الاحتياطي</h2></div>'
@@ -1173,15 +1150,16 @@ function markSVG(){
 function viewTop(){
   var ws = weekStart(today()), wTotal = 0;
   for(var i=0;i<7;i++) wTotal += dayScore(getDay(shift(ws,i)));
+  var nm = (S.cfg.name||"").trim();
   return '<div class="top">'
     + '<div class="brand">'
     +   '<div class="mark">'+markSVG()+'</div>'
-    +   '<div><h1>محاسبة النفس</h1><p>اليومية</p></div>'
+    +   '<div><h1>'+(nm ? esc(nm) : "محاسبة النفس")+'</h1>'
+    +     '<p>'+(nm ? "محاسبة النفس اليومية" : "اكتب اسمك من الضبط")+'</p></div>'
     + '</div>'
     + '<div class="wk'+(wTotal>BASE_WEEK?" full":"")+'"><b>'+ar(wTotal)+'</b><span>من '+ar(BASE_WEEK)+' هذا الأسبوع</span></div>'
     + '</div>';
 }
-/* أيقونات الشريط السفلي — شمس لليوم، تقويم للسجل، ترس للضبط */
 var TAB_ICONS = {
   today:'<circle cx="12" cy="12" r="4.2"/>'
        +'<path d="M12 1.8v2.4M12 19.8v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M1.8 12h2.4M19.8 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"/>',
@@ -1244,7 +1222,6 @@ document.addEventListener("click", async function(ev){
   var el = ev.target.closest("[data-a]");
   if(!el) return;
   var a = el.dataset.a, v = el.dataset.v, i = el.dataset.i;
-  /* النقر داخل البطاقة لا يغلقها — الإغلاق من الخلفية أو من ✕ فقط */
   if(a==="close" && el.classList.contains("veil") && ev.target.closest("[data-stop]")) return;
 
   switch(a){
@@ -1262,20 +1239,32 @@ document.addEventListener("click", async function(ev){
     case "open": {
       var rec = (getDay(UI.cursor)||{}).p ? getDay(UI.cursor).p[v] : null;
       UI.sheet = { ds:UI.cursor, pid:v, exists:!!rec,
-        draft: rec ? { a:rec.a, k:rec.k, z:rec.z, r:rec.r||0, t:rec.t||0, n:rec.n||"" }
-                   : { a:null, k:null, z:null, r:0, t:0, n:"" } };
+        draft: rec ? { e:rec.e, m:rec.m, k:rec.k, z:rec.z||0, r:rec.r||0, n:rec.n||"" }
+                   : { e:null, m:null, k:null, z:0, r:0, n:"" } };
       break;
     }
     case "close": UI.sheet = null; break;
-    case "set": if(UI.sheet) UI.sheet.draft[i] = (UI.sheet.draft[i]===+v ? null : +v); break;
+    case "set": {
+      if(!UI.sheet) break;
+      var wasTop = UI.sheet.draft[i]===6;
+      UI.sheet.draft[i] = (UI.sheet.draft[i]===+v ? null : +v);
+      /* بريق عند بلوغ الدرجة العليا */
+      if(+v===6 && !wasTop && UI.sheet.draft[i]===6){
+        render();
+        var fresh = document.querySelector('.opt.top.on[data-i="'+i+'"]');
+        burstSparkles(fresh);
+        return;
+      }
+      break;
+    }
     case "bon": if(UI.sheet) UI.sheet.draft[i] = UI.sheet.draft[i] ? 0 : 1; break;
     case "save": {
       var sh = UI.sheet; if(!sh) break;
       var d0 = sh.draft;
-      if(d0.a==null || d0.k==null || d0.z==null) break;
+      if(d0.e==null || d0.m==null || d0.k==null) break;
       var pr = PRAYERS.filter(function(p){ return p.id===sh.pid; })[0];
       editDay(sh.ds, function(day){
-        day.p[sh.pid] = { a:d0.a, k:d0.k, z:d0.z, r:(pr.ratiba && d0.r)?1:0, t:d0.t?1:0, n:(d0.n||"").trim() };
+        day.p[sh.pid] = { e:d0.e, m:d0.m, k:d0.k, z:d0.z?1:0, r:(pr.ratiba && d0.r)?1:0, n:(d0.n||"").trim() };
       });
       UI.sheet = null;
       break;
@@ -1287,46 +1276,22 @@ document.addEventListener("click", async function(ev){
       break;
     }
 
-    case "wq": editDay(UI.cursor, function(d){ d.w.q = (d.w.q===+v ? null : +v); }); break;
-    case "wt": editDay(UI.cursor, function(d){ d.w[i] = d.w[i] ? 0 : 1; }); break;
-    case "hchk": editDay(UI.cursor, function(d){ d.h[i] = d.h[i]>=1 ? 0 : 1; }); break;
-    case "hinc": editDay(UI.cursor, function(d){ d.h[i] = (d.h[i]||0) + hStep(i); }); break;
-    case "hdec": editDay(UI.cursor, function(d){ d.h[i] = Math.max(0,(d.h[i]||0) - hStep(i)); }); break;
+    case "read": editDay(UI.cursor, function(d){ d.read = d.read ? 0 : 1; }); break;
 
     case "met": UI.metric = v; break;
     case "rng": UI.range = +v; break;
     case "mode": UI.mode = v; break;
+    case "chart": UI.chart = v; break;
     case "mon": {
       var p2 = UI.month.split("-").map(Number);
       var dt = new Date(p2[0], p2[1]-1+ +v, 1);
       var mk = dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0");
-      if(mk <= today().slice(0,7)) UI.month = mk;
+      if(mk <= today().slice(0,7) && mk >= S.cfg.start.slice(0,7)) UI.month = mk;
       break;
     }
     case "hday": UI.cursor = v; UI.tab = "today"; window.scrollTo(0,0); break;
 
     case "theme": S.cfg.theme = v; document.documentElement.setAttribute("data-theme", v); save(); break;
-    case "htype": UI.form.type = v; break;
-    case "addh": {
-      var nm = (UI.form.name||"").trim();
-      if(!nm){ UI.msg = "اكتب اسم العادة أولاً."; break; }
-      S.cfg.habits.push({
-        id:"h"+Date.now(), name:nm, type:UI.form.type,
-        target: UI.form.type==="check" ? 1 : Math.max(1, +UI.form.target||1),
-        unit: (UI.form.unit||"").trim(),
-        points: Math.max(1, +UI.form.points||1)
-      });
-      UI.form = { name:"", type:UI.form.type, target:1, points:2, unit:"" };
-      UI.msg = ""; save();
-      break;
-    }
-    case "delh": {
-      if(UI.confirm===i){
-        S.cfg.habits = S.cfg.habits.filter(function(x){ return x.id!==i; });
-        UI.confirm = null; save();
-      } else UI.confirm = i;
-      break;
-    }
     case "exp": exportData(); break;
     case "imp": document.getElementById("pick").click(); return;
     case "reset": {
@@ -1340,11 +1305,6 @@ document.addEventListener("click", async function(ev){
   render();
 });
 
-function hStep(id){
-  var hb = S.cfg.habits.filter(function(x){ return x.id===id; })[0];
-  return hb && hb.target>=50 ? 10 : 1;
-}
-
 /* المدخلات النصية — تُحفظ بلا إعادة رسم حتى لا يضيع مؤشر الكتابة */
 document.addEventListener("input", function(ev){
   var el = ev.target.closest("[data-inp]"); if(!el) return;
@@ -1352,12 +1312,7 @@ document.addEventListener("input", function(ev){
   switch(f){
     case "note": editDay(UI.cursor, function(d){ d.note = val; }); break;
     case "pnote": if(UI.sheet) UI.sheet.draft.n = val; break;
-    case "hname": UI.form.name = val; break;
-    case "htarget": UI.form.target = val; break;
-    case "hpoints": UI.form.points = val; break;
-    case "hunit": UI.form.unit = val; break;
-    case "qtarget": S.cfg.quran.target = Math.max(1, +val||1); save(); break;
-    case "qunit": S.cfg.quran.unit = val; save(); break;
+    case "uname": S.cfg.name = val; save(); break;
     case "aemail": UI.auth.email = val; break;
     case "apass": UI.auth.password = val; break;
     case "apass2": UI.auth.password2 = val; break;
@@ -1366,7 +1321,8 @@ document.addEventListener("input", function(ev){
 document.addEventListener("change", function(ev){
   var el = ev.target.closest("[data-inp]"); if(!el) return;
   if(el.dataset.inp==="start"){
-    S.cfg.start = el.value || weekStart(today());
+    S.cfg.start = el.value || today();
+    if(UI.month < S.cfg.start.slice(0,7)) UI.month = S.cfg.start.slice(0,7);
     save(); render();
   }
 });
@@ -1381,11 +1337,11 @@ document.addEventListener("keydown", function(ev){
    [١٢] التصدير والاستيراد
    ============================================================ */
 function exportData(){
-  var blob = new Blob([JSON.stringify({ app:"mirqat", v:1, at:new Date().toISOString(), cfg:S.cfg, days:S.days }, null, 2)],
+  var blob = new Blob([JSON.stringify({ app:"muhasaba", v:2, at:new Date().toISOString(), cfg:S.cfg, days:S.days }, null, 2)],
     { type:"application/json" });
   var url = URL.createObjectURL(blob);
   var a = document.createElement("a");
-  a.href = url; a.download = "mirqat-"+today()+".json";
+  a.href = url; a.download = "muhasaba-"+today()+".json";
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
   UI.msg = "تم تنزيل نسخة.";
@@ -1400,8 +1356,8 @@ document.getElementById("pick").addEventListener("change", function(ev){
       var d = JSON.parse(r.result);
       if(!d || typeof d.days !== "object") throw new Error("bad");
       S.days = d.days || {};
-      if(d.cfg) S.cfg = Object.assign({ start:weekStart(today()), theme:"light", quran:{target:5,unit:"صفحة"}, habits:DEFAULT_HABITS.slice() }, d.cfg);
-      if(!Array.isArray(S.cfg.habits)) S.cfg.habits = DEFAULT_HABITS.slice();
+      if(d.cfg) S.cfg = Object.assign(defaultCfg(), d.cfg);
+      if(!S.cfg.start) S.cfg.start = today();
       document.documentElement.setAttribute("data-theme", S.cfg.theme==="dark"?"dark":"light");
       UI.msg = "تم الاستيراد بنجاح.";
       save(); render();
@@ -1414,11 +1370,11 @@ document.getElementById("pick").addEventListener("change", function(ev){
 });
 
 /* ============================================================
-   [١٣] الإقلاع — تسجيل الدخول أولاً، ثم تحميل السجل من السحابة
+   [١٣] الإقلاع
    ============================================================ */
 UI.cursor = today();
 UI.month = today().slice(0,7);
-render(); /* شاشة التحميل */
+render();
 
 onAuthStateChanged(auth, function(user){
   if(user){
