@@ -82,8 +82,21 @@ input,textarea,select{font-family:inherit}
 .empty{color:var(--ink2);font-size:12.5px;font-weight:600;text-align:center;padding:16px}
 .hint{font-size:11px;font-weight:600;color:var(--ink2);line-height:1.8}
 .foot{text-align:center;color:var(--ink3);font-size:11px;font-weight:600;margin:26px 0 4px}
-.screen{animation:fade .28s ease}
+/* الحركة تُطبَّق فقط عند تبديل التبويب — لا مع كل ضغطة زر */
+.screen.anim{animation:fade .28s ease}
 @keyframes fade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+
+/* شريط وضع الضيف */
+.guestbar{display:flex;align-items:center;gap:9px;background:color-mix(in srgb,var(--gold) 14%,transparent);
+  border:1px solid color-mix(in srgb,var(--gold) 40%,transparent);border-radius:14px;padding:9px 12px;margin-bottom:11px}
+.guestbar p{margin:0;flex:1;font-size:11.5px;font-weight:600;line-height:1.75;color:var(--ink2)}
+.guestbar b{color:var(--gold)}
+.guestbar button{flex:0 0 auto;padding:7px 12px;border-radius:10px;background:var(--gold);color:#fff;font-size:11.5px;font-weight:700}
+
+/* رسالة الأمس */
+.letter{position:relative;margin-top:11px;padding:14px 16px;border-right:3px solid var(--accent);background:var(--card2)}
+.letter em{display:block;font-style:normal;font-size:10.5px;font-weight:700;color:var(--accent);margin-bottom:6px}
+.letter p{margin:0;font-size:14.5px;font-weight:500;line-height:2.05;white-space:pre-wrap}
 
 /* ---------- شريط التاريخ ---------- */
 .datebar{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:5px;box-shadow:var(--shadow)}
@@ -427,9 +440,37 @@ function ratioColor(val, base){
    [٣] الحالة والتخزين
    ============================================================ */
 var S = {
-  cfg:{ start:"", theme:"light", name:"" },
+  cfg:{ start:"", theme:"light", name:"", sound:true },
   days:{}
 };
+
+/* ============================================================
+   أصوات تفاعلية بسيطة — مولّدة داخلياً بلا أي ملفات
+   ============================================================ */
+var actx = null;
+function sfx(kind){
+  if(!S.cfg.sound) return;
+  try{
+    if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==="suspended") actx.resume();
+    var t = actx.currentTime;
+    /* نغمة واحدة قصيرة، حجمها خافت حتى لا تُزعج */
+    function tone(freq, start, dur, vol, type){
+      var o = actx.createOscillator(), g = actx.createGain();
+      o.type = type||"sine"; o.frequency.value = freq;
+      g.gain.setValueAtTime(0, t+start);
+      g.gain.linearRampToValueAtTime(vol, t+start+0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t+start+dur);
+      o.connect(g); g.connect(actx.destination);
+      o.start(t+start); o.stop(t+start+dur+0.02);
+    }
+    if(kind==="tick")      tone(660, 0, 0.055, 0.045);              /* اختيار / تنقّل */
+    else if(kind==="on")   tone(880, 0, 0.075, 0.055);              /* تفعيل */
+    else if(kind==="off")  tone(440, 0, 0.075, 0.045);              /* إلغاء */
+    else if(kind==="save"){ tone(660,0,0.09,0.05); tone(990,0.075,0.13,0.05); }
+    else if(kind==="star"){ [784,988,1319,1568].forEach(function(f,i){ tone(f, i*0.055, 0.16, 0.045, "triangle"); }); }
+  }catch(e){}
+}
 var UI = {
   tab:"today", cursor:today(), athar:0, sheet:null,
   metric:"total", range:30, mode:"day", chart:"line", month:today().slice(0,7),
@@ -437,12 +478,52 @@ var UI = {
   auth:{ mode:"login", email:"", password:"", password2:"", busy:false, err:"", info:"" }
 };
 
+/* loading | signedout | signedin | guest */
 var AUTH_STATE = "loading";
 var CLOUD_UID = null;
 var CLOUD_EMAIL = "";
+var GUEST = false;
+var GUEST_KEY = "muhasaba:guest";
 
 function defaultCfg(){
-  return { start: today(), theme:"light", name:"" };
+  return { start: today(), theme:"light", name:"", sound:true };
+}
+
+/* ---------- وضع الضيف: التخزين على هذا الجهاز فقط ---------- */
+function loadGuest(){
+  var raw = null;
+  try{ raw = localStorage.getItem(GUEST_KEY); }catch(e){}
+  if(raw){
+    try{
+      var d = JSON.parse(raw);
+      S.cfg = Object.assign(defaultCfg(), d.cfg || {});
+      S.days = d.days || {};
+    }catch(e){ S.cfg = defaultCfg(); S.days = {}; }
+  }else{
+    S.cfg = defaultCfg(); S.days = {};
+  }
+  if(!S.cfg.start) S.cfg.start = today();
+  document.documentElement.setAttribute("data-theme", S.cfg.theme==="dark" ? "dark" : "light");
+}
+function saveGuest(){
+  try{ localStorage.setItem(GUEST_KEY, JSON.stringify({ cfg:S.cfg, days:S.days, at:Date.now() })); }
+  catch(e){ console.error(e); }
+}
+function enterGuest(){
+  GUEST = true;
+  CLOUD_UID = null; CLOUD_EMAIL = "";
+  loadGuest();
+  AUTH_STATE = "guest";
+  UI.cursor = today();
+  UI.month = today().slice(0,7);
+  render();
+}
+function leaveGuest(){
+  GUEST = false;
+  AUTH_STATE = "signedout";
+  UI.auth = { mode:"signup", email:"", password:"", password2:"", busy:false, err:"",
+              info:"سجلّك المحفوظ على هذا الجهاز سيُرفع تلقائياً إلى حسابك عند إنشائه." };
+  render();
 }
 
 async function bootCloudData(){
@@ -453,10 +534,18 @@ async function bootCloudData(){
     S.cfg = Object.assign(defaultCfg(), data.cfg || {});
     S.days = data.days || {};
   }else{
-    /* أول دخول: البداية من اليوم */
-    S.cfg = defaultCfg();
-    S.days = {};
+    /* أول دخول: لو كان يستعمل التطبيق كضيف على هذا الجهاز، نرفع سجلّه تلقائياً */
+    var g = null;
+    try{ var raw = localStorage.getItem(GUEST_KEY); if(raw) g = JSON.parse(raw); }catch(e){}
+    if(g && g.days && Object.keys(g.days).length){
+      S.cfg = Object.assign(defaultCfg(), g.cfg || {});
+      S.days = g.days;
+    }else{
+      S.cfg = defaultCfg();
+      S.days = {};
+    }
     await setDoc(ref, { cfg:S.cfg, days:S.days, updatedAt:Date.now() });
+    try{ localStorage.removeItem(GUEST_KEY); }catch(e){}
   }
   if(!S.cfg.start) S.cfg.start = today();
   document.documentElement.setAttribute("data-theme", S.cfg.theme==="dark" ? "dark" : "light");
@@ -466,6 +555,7 @@ var saveT = null, saveOk = true;
 function save(){
   clearTimeout(saveT);
   saveT = setTimeout(function(){
+    if(GUEST){ saveGuest(); return; }
     if(!CLOUD_UID) return;
     var ref = doc(dbFs, "users", CLOUD_UID);
     setDoc(ref, { cfg:S.cfg, days:S.days, updatedAt:Date.now() })
@@ -631,72 +721,94 @@ function gaugeSVG(pct, color){
   return out;
 }
 
+/* ------------------------------------------------------------
+   تدريج مريح للعين: يختار خطوة مستديرة (١٠، ٢٠، ٥٠…) بدل
+   أرقام عشوائية مثل ١٦ و٣٣ و٥٤
+   ------------------------------------------------------------ */
+var TICK_LADDER = [1,2,5,10,20,25,50,100,200,250,500,1000];
+function niceScale(maxV, maxTicks){
+  maxTicks = maxTicks || 6;
+  var need = Math.max(1, maxV);
+  for(var i=0;i<TICK_LADDER.length;i++){
+    var st = TICK_LADDER[i];
+    var top = Math.ceil(need/st)*st;
+    if(top/st <= maxTicks) return { step:st, top:top };
+  }
+  var last = TICK_LADDER[TICK_LADDER.length-1];
+  return { step:last, top:Math.ceil(need/last)*last };
+}
+function ticksOf(sc){
+  var out=[]; for(var v=0; v<=sc.top+0.0001; v+=sc.step) out.push(v); return out;
+}
+
+/* أعمدة — الأقدم يساراً والأحدث يميناً، ومحور y على اليسار */
 function barsSVG(series, base){
-  var W=340, H=168, padT=14, padB=24, padL=6, padR=28;
+  var W=340, H=176, padT=14, padB=26, padL=30, padR=8;
   var n = series.length;
   if(!n) return '<div class="empty">لا توجد بيانات في هذه المدة.</div>';
   var maxV = base;
   series.forEach(function(s){ if(s.value>maxV) maxV=s.value; });
-  var top = Math.max(1, Math.ceil(maxV*1.14));
+  var sc = niceScale(maxV, 6), top = sc.top;
   var plotW = W-padL-padR, plotH = H-padT-padB;
   var bw = plotW/n;
   var Y = function(v){ return padT + (1 - v/top)*plotH; };
-  var out = '<svg viewBox="0 0 '+W+' '+H+'" width="100%" preserveAspectRatio="xMidYMid meet">';
-  [0,0.5,1].forEach(function(f){
-    var v = Math.round(top*f);
+
+  var out = '<svg viewBox="0 0 '+W+' '+H+'" width="100%" preserveAspectRatio="xMidYMid meet" direction="ltr">';
+  ticksOf(sc).forEach(function(v){
     out += '<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--grid)" stroke-width="1"/>';
-    out += '<text x="'+(W-padR+5)+'" y="'+(Y(v)+4)+'" fill="var(--ink3)" font-size="10" font-weight="700" text-anchor="start">'+ar(v)+'</text>';
+    out += '<text x="'+(padL-6)+'" y="'+(Y(v)+3.5)+'" fill="var(--ink3)" font-size="9.5" font-weight="700" text-anchor="end">'+ar(v)+'</text>';
   });
-  if(base>0){
+  if(base>0 && base<=top){
     out += '<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+Y(base)+'" y2="'+Y(base)+'" stroke="var(--gold)" stroke-width="1.4" stroke-dasharray="5 4" opacity="0.9"/>';
   }
+  /* محورا الرسم — الأصل أسفل اليسار */
+  out += '<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+(H-padB)+'" y2="'+(H-padB)+'" stroke="var(--ink3)" stroke-width="1.2"/>';
+  out += '<line x1="'+padL+'" x2="'+padL+'" y1="'+padT+'" y2="'+(H-padB)+'" stroke="var(--ink3)" stroke-width="1.2"/>';
+
   series.forEach(function(s,i){
-    var x = W-padR-(i+1)*bw + Math.min(3, bw*0.16);
+    var x = padL + i*bw + Math.min(3, bw*0.16);
     var w = Math.max(2, bw - Math.min(6, bw*0.32));
     var h = Math.max(s.has ? 3 : 2, (H-padB) - Y(s.value));
     var y = (H-padB) - h;
     var col = s.has ? ratioColor(s.value, base||1) : "var(--line2)";
-    var rd = Math.min(4, w/2);
-    out += '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="'+rd+'" fill="'+col+'"/>';
+    out += '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="'+Math.min(4,w/2)+'" fill="'+col+'"/>';
   });
-  var step = n<=8 ? 1 : Math.ceil(n/6);
+  var st = n<=8 ? 1 : Math.ceil(n/6);
   series.forEach(function(s,i){
-    if(i%step) return;
-    var x = W-padR-(i+0.5)*bw;
-    out += '<text x="'+x.toFixed(1)+'" y="'+(H-8)+'" fill="var(--ink3)" font-size="9.5" font-weight="700" text-anchor="middle">'+s.label+'</text>';
+    if((n-1-i) % st) return;               /* التسميات مثبّتة على الأحدث */
+    var x = padL + (i+0.5)*bw;
+    out += '<text x="'+x.toFixed(1)+'" y="'+(H-9)+'" fill="var(--ink3)" font-size="9.5" font-weight="700" text-anchor="middle" direction="ltr">'+s.label+'</text>';
   });
   out += '</svg>';
   return out;
 }
 
-/* منحنى التقدم — محورا x و y، الأحدث يساراً */
+/* منحنى التقدم — الأصل أسفل اليسار، الأقدم يساراً والأحدث يميناً */
 function lineSVG(series, base){
-  var W=340, H=190, padT=16, padB=30, padL=10, padR=30;
+  var W=340, H=196, padT=16, padB=30, padL=32, padR=10;
   var n = series.length;
   if(!n) return '<div class="empty">لا توجد بيانات في هذه المدة.</div>';
   var maxV = base;
   series.forEach(function(s){ if(s.value>maxV) maxV=s.value; });
-  var top = Math.max(1, Math.ceil(maxV*1.14));
+  var sc = niceScale(maxV, 6), top = sc.top;
   var plotW = W-padL-padR, plotH = H-padT-padB;
   var Y = function(v){ return padT + (1 - v/top)*plotH; };
-  /* الأحدث يساراً: i=0 (الأحدث) عند أقصى اليسار */
-  var X = function(i){ return n===1 ? (padL+plotW/2) : (W-padR) - (i/(n-1))*plotW; };
+  var X = function(i){ return n===1 ? (padL+plotW/2) : padL + (i/(n-1))*plotW; };
 
-  var out = '<svg viewBox="0 0 '+W+' '+H+'" width="100%" preserveAspectRatio="xMidYMid meet">';
+  var out = '<svg viewBox="0 0 '+W+' '+H+'" width="100%" preserveAspectRatio="xMidYMid meet" direction="ltr">';
 
-  /* شبكة أفقية + تدريج محور y */
-  [0,0.25,0.5,0.75,1].forEach(function(f){
-    var v = Math.round(top*f);
+  /* شبكة أفقية + تدريج محور y على يسار المحور تماماً */
+  ticksOf(sc).forEach(function(v){
     out += '<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--grid)" stroke-width="1"/>';
-    out += '<text x="'+(W-padR+5)+'" y="'+(Y(v)+4)+'" fill="var(--ink3)" font-size="10" font-weight="700" text-anchor="start">'+ar(v)+'</text>';
+    out += '<text x="'+(padL-6)+'" y="'+(Y(v)+3.5)+'" fill="var(--ink3)" font-size="9.5" font-weight="700" text-anchor="end">'+ar(v)+'</text>';
   });
-  /* محورا الرسم */
-  out += '<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+(H-padB)+'" y2="'+(H-padB)+'" stroke="var(--ink3)" stroke-width="1.2"/>';
-  out += '<line x1="'+(W-padR)+'" x2="'+(W-padR)+'" y1="'+padT+'" y2="'+(H-padB)+'" stroke="var(--ink3)" stroke-width="1.2"/>';
   /* خط المطلوب */
-  if(base>0){
+  if(base>0 && base<=top){
     out += '<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+Y(base)+'" y2="'+Y(base)+'" stroke="var(--gold)" stroke-width="1.4" stroke-dasharray="5 4" opacity="0.9"/>';
   }
+  /* محورا الرسم — الأصل أسفل اليسار */
+  out += '<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+(H-padB)+'" y2="'+(H-padB)+'" stroke="var(--ink3)" stroke-width="1.2"/>';
+  out += '<line x1="'+padL+'" x2="'+padL+'" y1="'+padT+'" y2="'+(H-padB)+'" stroke="var(--ink3)" stroke-width="1.2"/>';
 
   /* المسار — يتجاهل الأيام غير المسجلة فلا ينكسر الخط */
   var pts = [];
@@ -704,7 +816,6 @@ function lineSVG(series, base){
 
   if(pts.length>1){
     var dLine = pts.map(function(p,i){ return (i?"L":"M")+p.x.toFixed(1)+" "+p.y.toFixed(1); }).join(" ");
-    /* تظليل تحت المنحنى */
     var areaD = dLine + " L "+pts[pts.length-1].x.toFixed(1)+" "+(H-padB)
               + " L "+pts[0].x.toFixed(1)+" "+(H-padB)+" Z";
     out += '<path d="'+areaD+'" fill="var(--accent)" opacity="0.11"/>';
@@ -715,10 +826,10 @@ function lineSVG(series, base){
   });
 
   /* تدريج محور x */
-  var step = n<=8 ? 1 : Math.ceil(n/6);
+  var st = n<=8 ? 1 : Math.ceil(n/6);
   series.forEach(function(s,i){
-    if(i%step) return;
-    out += '<text x="'+X(i).toFixed(1)+'" y="'+(H-10)+'" fill="var(--ink3)" font-size="9.5" font-weight="700" text-anchor="middle">'+s.label+'</text>';
+    if((n-1-i) % st) return;               /* التسميات مثبّتة على الأحدث */
+    out += '<text x="'+X(i).toFixed(1)+'" y="'+(H-11)+'" fill="var(--ink3)" font-size="9.5" font-weight="700" text-anchor="middle" direction="ltr">'+s.label+'</text>';
   });
   out += '</svg>';
   return out;
@@ -753,6 +864,12 @@ function viewToday(){
 
   /* مقولة عن الصلاة */
   h += '<div class="card quote" data-a="athar"><p>'+esc(a.t)+'</p><span>'+esc(a.s)+'</span><i>اضغط لغيرها ↻</i></div>';
+
+  /* رسالة الأمس — كتبتها بالأمس لنفسك اليوم */
+  var prev = getDay(shift(ds,-1));
+  if(prev && prev.note && prev.note.trim()){
+    h += '<div class="card letter"><em>✉ رسالتك من الأمس</em><p>'+esc(prev.note.trim())+'</p></div>';
+  }
 
   /* الميزان */
   h += '<div class="card gauge">'
@@ -805,10 +922,10 @@ function viewToday(){
      +   '<button class="tog'+(readOn?" on":"")+'" data-a="read"><i></i></button>'
      + '</div></div>';
 
-  /* المحاسبة */
-  h += '<div class="sect"><h2>محاسبة اليوم</h2><em>ماذا تُصلح غداً؟</em></div>';
-  h += '<textarea class="note" rows="3" data-inp="note" placeholder="ما الذي أضعف صلاتك اليوم؟ وما الذي تعزم عليه غداً؟">'+esc(d&&d.note?d.note:"")+'</textarea>';
-  h += '<div class="foot">تجد كل ملاحظاتك مجموعة في السجل · يُحفظ كل شيء تلقائياً.</div>';
+  /* رسالة لنفسك غداً */
+  h += '<div class="sect"><h2>رسالة لنفسك غداً</h2><em>تقرأها في الصباح</em></div>';
+  h += '<textarea class="note" rows="3" data-inp="note" placeholder="اكتب لنفسك ما تحب أن تُذكَّر به غداً… وصية، أو عزيمة، أو ما تُصلحه في صلاتك.">'+esc(d&&d.note?d.note:"")+'</textarea>';
+  h += '<div class="foot">تظهر لك غداً في أعلى الصفحة · وتُحفظ كلها في السجل.</div>';
   h += '</div>';
   return h;
 }
@@ -900,7 +1017,7 @@ function burstSparkles(el){
 function viewHistory(){
   var M = metricOf(UI.metric);
   var days = rangeDays(UI.range);
-  var chrono = days.slice();
+  var chrono = days.slice().reverse();   /* الأقدم أولاً — ليمضي الرسم من اليسار إلى اليمين */
 
   /* إحصاءات */
   var sum=0, n=0, best=null, bestV=-1, over=0;
@@ -966,7 +1083,7 @@ function viewHistory(){
   days.forEach(function(ds){
     var d = getDay(ds); if(!d) return;
     var items = [];
-    if(d.note && d.note.trim()) items.push({ who:"محاسبة", txt:d.note.trim() });
+    if(d.note && d.note.trim()) items.push({ who:"رسالة", txt:d.note.trim() });
     PRAYERS.forEach(function(pr){
       var p = d.p && d.p[pr.id];
       if(p && p.n && p.n.trim()) items.push({ who:pr.name, txt:p.n.trim() });
@@ -1005,7 +1122,7 @@ function viewHistory(){
      + '</div>';
   h += '<div class="card chart"><div class="chead">'
      +   '<span>الخط الذهبي = المطلوب ('+ar(chartBase)+')</span>'
-     +   '<span>الأحدث يساراً</span></div>'
+     +   '<span>الأحدث يميناً ←</span></div>'
      +   (UI.chart==="line" ? lineSVG(series, chartBase) : barsSVG(series, chartBase)) + '</div>';
 
   /* الرزنامة */
@@ -1059,7 +1176,7 @@ function viewHistory(){
 
   /* دفتر الملاحظات */
   var cnt = notes.reduce(function(s,x){ return s+x.items.length; },0);
-  h += '<div class="sect"><h2>دفتر المحاسبة</h2><em>'+ar(cnt)+' ملاحظة</em></div>';
+  h += '<div class="sect"><h2>دفتر الرسائل</h2><em>'+ar(cnt)+' رسالة</em></div>';
   if(!notes.length) h += '<div class="card empty">لم تكتب شيئاً بعد.</div>';
   notes.forEach(function(g){
     h += '<div class="card ngroup"><div class="ndate">'+longDate(g.ds)+'</div>';
@@ -1088,11 +1205,26 @@ function viewSettings(){
      +   '<input class="in" placeholder="اكتب اسمك" value="'+esc(S.cfg.name||"")+'" data-inp="uname">'
      + '</div>';
 
-  h += '<div class="sect"><h2>الحساب</h2></div>'
-     + '<div class="card box">'
-     +   '<div class="hint">مسجّل الدخول بـ: <b style="color:var(--accent);font-family:\'Hiraf\',serif;font-weight:500">'+esc(CLOUD_EMAIL)+'</b></div>'
-     +   '<button class="btn dg sm" data-a="signout">تسجيل الخروج</button>'
-     + '</div>';
+  h += '<div class="sect"><h2>الحساب</h2></div>';
+  if(GUEST){
+    h += '<div class="card box">'
+       +   '<div class="hint">أنت في <b style="color:var(--gold)">وضع الضيف</b> — سجلّك محفوظ على هذا الجهاز فقط، '
+       +     'ولا يُرفع إلى أي حساب ولا يصلك من جهاز آخر.</div>'
+       +   '<button class="btn sm" data-a="toaccount">أنشئ حساباً واحفظ سجلّي</button>'
+       +   '<div class="hint">عند إنشاء الحساب يُرفع سجلّك الحالي تلقائياً ولا يضيع منه شيء.</div>'
+       + '</div>';
+  }else{
+    h += '<div class="card box">'
+       +   '<div class="hint">مسجّل الدخول بـ: <b style="color:var(--accent);font-family:\'Hiraf\',serif;font-weight:500">'+esc(CLOUD_EMAIL)+'</b></div>'
+       +   '<button class="btn dg sm" data-a="signout">تسجيل الخروج</button>'
+       + '</div>';
+  }
+
+  h += '<div class="sect"><h2>الصوت</h2></div>'
+     + '<div class="card"><div class="wline">'
+     +   '<div class="wlab">أصوات الأزرار<i>نقرات خفيفة عند التسجيل والاختيار</i></div>'
+     +   '<button class="tog'+(S.cfg.sound!==false?" on":"")+'" data-a="sound"><i></i></button>'
+     + '</div></div>';
 
   h += '<div class="sect"><h2>المظهر</h2></div>'
      + '<div class="swap">'
@@ -1130,7 +1262,7 @@ function viewSettings(){
      +   '<button class="btn dg sm" data-a="reset">'+(UI.confirm==="reset"?"تأكيد المسح":"مسح الكل")+'</button>'
      + '</div>'
      + (UI.msg ? '<div class="hint" style="color:var(--accent)">'+esc(UI.msg)+'</div>' : "")
-     + '<div class="hint">التخزين: سحابي (Firebase) · '+(saveOk?"يعمل":"فيه خلل — تحقق من الإنترنت")+' · '+ar(recorded)+' يوم مسجّل.</div>'
+     + '<div class="hint">التخزين: '+(GUEST ? 'هذا الجهاز فقط' : 'سحابي (Firebase) · '+(saveOk?"يعمل":"فيه خلل — تحقق من الإنترنت"))+' · '+ar(recorded)+' يوم مسجّل.</div>'
      + '<div class="hint">الاستيراد يستبدل كل ما هو موجود — صدّر نسخة أولاً.</div>'
      + '</div>';
 
@@ -1204,15 +1336,47 @@ function viewAuth(){
   h += '<button class="btn" style="width:100%;margin-top:5px" data-a="asubmit"'+(a.busy?" disabled":"")+'>'+(a.busy?"جارٍ…":(isSignup?"إنشاء الحساب":"دخول"))+'</button>';
   if(!isSignup) h += '<button class="aforgot" data-a="aforgot">نسيت كلمة المرور؟</button>';
   h += '<div class="aswitch">'+(isSignup?"لديك حساب؟ ":"ليس لديك حساب؟ ")+'<button data-a="atoggle">'+(isSignup?"سجّل الدخول":"أنشئ واحدًا")+'</button></div>';
+
+  /* الدخول بلا حساب */
+  h += '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">'
+     +   '<button class="btn gh sm" style="width:100%" data-a="guest">ادخل بدون تسجيل</button>'
+     +   '<div class="hint" style="margin-top:8px;text-align:center;line-height:1.85">'
+     +     'سجلّك يُحفظ على هذا الجهاز فقط، ولا يُرفع إلى أي حساب.<br>'
+     +     'إن مسحت بيانات المتصفح أو غيّرت الجهاز، فقدته.'
+     +   '</div>'
+     + '</div>';
+
   h += '</div></div>';
   return h;
 }
+function guestBar(){
+  if(!GUEST) return "";
+  return '<div class="guestbar">'
+    + '<p><b>وضع الضيف</b> — سجلّك على هذا الجهاز فقط ولا يُرفع إلى أي حساب.</p>'
+    + '<button data-a="toaccount">احفظه</button>'
+    + '</div>';
+}
+
+/* الرسم — يحافظ على موضع التمرير ولا يعيد الحركة إلا عند تبديل التبويب */
+var lastTab = null, lastState = null;
 function render(){
   var app = document.getElementById("app");
-  if(AUTH_STATE==="loading"){ app.innerHTML = viewLoading(); return; }
-  if(AUTH_STATE==="signedout"){ app.innerHTML = viewAuth(); return; }
+  var y = window.scrollY;
+
+  if(AUTH_STATE==="loading"){ app.innerHTML = viewLoading(); lastTab=null; lastState="loading"; return; }
+  if(AUTH_STATE==="signedout"){ app.innerHTML = viewAuth(); lastTab=null; lastState="signedout"; return; }
+
+  var switched = (UI.tab !== lastTab) || (lastState !== "in");
+  lastTab = UI.tab; lastState = "in";
+
   var body = UI.tab==="today" ? viewToday() : UI.tab==="hist" ? viewHistory() : viewSettings();
-  app.innerHTML = viewTop() + body + viewTabs() + viewSheet();
+  if(!switched) body = body.replace('<div class="screen">', '<div class="screen noanim">');
+  else          body = body.replace('<div class="screen">', '<div class="screen anim">');
+
+  app.innerHTML = viewTop() + guestBar() + body + viewTabs() + viewSheet();
+
+  /* إعادة موضع التمرير فوراً حتى لا تقفز الصفحة مع كل ضغطة */
+  if(!switched && y) window.scrollTo(0, y);
 }
 
 /* ============================================================
@@ -1229,35 +1393,46 @@ document.addEventListener("click", async function(ev){
     case "aforgot": await handleForgotPassword(); break;
     case "atoggle": UI.auth.mode = UI.auth.mode==="login"?"signup":"login"; UI.auth.err=""; UI.auth.info=""; break;
     case "signout": try{ await signOut(auth); }catch(e){ console.error(e); } break;
+    case "guest": sfx("save"); enterGuest(); return;
+    case "toaccount": sfx("tick"); leaveGuest(); return;
+    case "sound":
+      S.cfg.sound = (S.cfg.sound===false);
+      if(S.cfg.sound) sfx("on");
+      save(); break;
 
-    case "tab": UI.tab = v; UI.confirm=null; UI.msg=""; window.scrollTo(0,0); break;
-    case "go": UI.cursor = shift(UI.cursor, +v); if(UI.cursor>today()) UI.cursor=today(); break;
-    case "today": UI.cursor = today(); break;
-    case "pick": UI.cursor = v; break;
-    case "athar": UI.athar++; break;
+    case "tab": if(UI.tab!==v) sfx("tick"); UI.tab = v; UI.confirm=null; UI.msg=""; window.scrollTo(0,0); break;
+    case "go": sfx("tick"); UI.cursor = shift(UI.cursor, +v); if(UI.cursor>today()) UI.cursor=today(); break;
+    case "today": sfx("tick"); UI.cursor = today(); break;
+    case "pick": sfx("tick"); UI.cursor = v; break;
+    case "athar": sfx("tick"); UI.athar++; break;
 
     case "open": {
+      sfx("tick");
       var rec = (getDay(UI.cursor)||{}).p ? getDay(UI.cursor).p[v] : null;
       UI.sheet = { ds:UI.cursor, pid:v, exists:!!rec,
         draft: rec ? { e:rec.e, m:rec.m, k:rec.k, z:rec.z||0, r:rec.r||0, n:rec.n||"" }
                    : { e:null, m:null, k:null, z:0, r:0, n:"" } };
       break;
     }
-    case "close": UI.sheet = null; break;
+    case "close": sfx("off"); UI.sheet = null; break;
     case "set": {
       if(!UI.sheet) break;
       var wasTop = UI.sheet.draft[i]===6;
       UI.sheet.draft[i] = (UI.sheet.draft[i]===+v ? null : +v);
-      /* بريق عند بلوغ الدرجة العليا */
+      /* بريق وصوت عند بلوغ الدرجة العليا */
       if(+v===6 && !wasTop && UI.sheet.draft[i]===6){
+        sfx("star");
         render();
         var fresh = document.querySelector('.opt.top.on[data-i="'+i+'"]');
         burstSparkles(fresh);
         return;
       }
+      sfx(UI.sheet.draft[i]==null ? "off" : "tick");
       break;
     }
-    case "bon": if(UI.sheet) UI.sheet.draft[i] = UI.sheet.draft[i] ? 0 : 1; break;
+    case "bon":
+      if(UI.sheet){ UI.sheet.draft[i] = UI.sheet.draft[i] ? 0 : 1; sfx(UI.sheet.draft[i] ? "on" : "off"); }
+      break;
     case "save": {
       var sh = UI.sheet; if(!sh) break;
       var d0 = sh.draft;
@@ -1266,22 +1441,27 @@ document.addEventListener("click", async function(ev){
       editDay(sh.ds, function(day){
         day.p[sh.pid] = { e:d0.e, m:d0.m, k:d0.k, z:d0.z?1:0, r:(pr.ratiba && d0.r)?1:0, n:(d0.n||"").trim() };
       });
+      sfx("save");
       UI.sheet = null;
       break;
     }
     case "del": {
       var s2 = UI.sheet; if(!s2) break;
       editDay(s2.ds, function(day){ delete day.p[s2.pid]; });
+      sfx("off");
       UI.sheet = null;
       break;
     }
 
-    case "read": editDay(UI.cursor, function(d){ d.read = d.read ? 0 : 1; }); break;
+    case "read":
+      editDay(UI.cursor, function(d){ d.read = d.read ? 0 : 1; });
+      sfx((getDay(UI.cursor)||{}).read ? "on" : "off");
+      break;
 
-    case "met": UI.metric = v; break;
-    case "rng": UI.range = +v; break;
-    case "mode": UI.mode = v; break;
-    case "chart": UI.chart = v; break;
+    case "met": sfx("tick"); UI.metric = v; break;
+    case "rng": sfx("tick"); UI.range = +v; break;
+    case "mode": sfx("tick"); UI.mode = v; break;
+    case "chart": sfx("tick"); UI.chart = v; break;
     case "mon": {
       var p2 = UI.month.split("-").map(Number);
       var dt = new Date(p2[0], p2[1]-1+ +v, 1);
@@ -1289,9 +1469,9 @@ document.addEventListener("click", async function(ev){
       if(mk <= today().slice(0,7) && mk >= S.cfg.start.slice(0,7)) UI.month = mk;
       break;
     }
-    case "hday": UI.cursor = v; UI.tab = "today"; window.scrollTo(0,0); break;
+    case "hday": sfx("tick"); UI.cursor = v; UI.tab = "today"; window.scrollTo(0,0); break;
 
-    case "theme": S.cfg.theme = v; document.documentElement.setAttribute("data-theme", v); save(); break;
+    case "theme": sfx("tick"); S.cfg.theme = v; document.documentElement.setAttribute("data-theme", v); save(); break;
     case "exp": exportData(); break;
     case "imp": document.getElementById("pick").click(); return;
     case "reset": {
@@ -1378,6 +1558,7 @@ render();
 
 onAuthStateChanged(auth, function(user){
   if(user){
+    GUEST = false;
     CLOUD_UID = user.uid;
     CLOUD_EMAIL = user.email || "";
     AUTH_STATE = "loading";
@@ -1396,6 +1577,8 @@ onAuthStateChanged(auth, function(user){
     });
   }else{
     CLOUD_UID = null; CLOUD_EMAIL = "";
+    /* لو كان يتصفح كضيف فلا نطرده إلى شاشة الدخول */
+    if(GUEST){ render(); return; }
     S.cfg = defaultCfg(); S.days = {};
     UI.auth = { mode:"login", email:"", password:"", password2:"", busy:false, err:"", info:"" };
     AUTH_STATE = "signedout";
